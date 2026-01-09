@@ -19,8 +19,11 @@ const images = {
     image3: {
         name: 'Road Run',
         src: 'assets/artwork/road-run.png',
-        textPosition: {x: 450, y: 850},
-        fontSize: '50px'
+        textPosition: {x: 609, y: 296},
+        fontSize: '50px',
+        scale:1.3,
+        skewX:0.06,
+        skewY:0.08,
     }
 };
 
@@ -38,7 +41,6 @@ document.fonts.load('75px chalkboard').then(function () {
     document.getElementById('generateBtn').disabled = false;
 });
 
-// Helper function to reset the canvas and redraw everything
 // Helper function to redraw with transform
 function redrawCanvas(selectedImage, userText, x, y, rotation, scale, skewX, skewY) {
     const image = new Image();
@@ -83,6 +85,17 @@ function redrawCanvas(selectedImage, userText, x, y, rotation, scale, skewX, ske
 }
 
 // Call redraw on all slider changes
+function loadFromConfig() {
+    const selectedImage = imageChoiceSelect.value;
+    debugger;
+    document.getElementById('textX').value = images[selectedImage].textPosition.x;
+    document.getElementById('textY').value = images[selectedImage].textPosition.y;
+    document.getElementById('scale').value = images[selectedImage].scale || 1;
+    document.getElementById('rotate').value = images[selectedImage].rotate || 0;
+    document.getElementById('skewX').value = images[selectedImage].skewX || 0;
+    document.getElementById('skewY').value = images[selectedImage].skewY || 0;
+}
+
 function updateAll() {
     const selectedImage = imageChoiceSelect.value;
     const userText = document.getElementById('userText').value;
@@ -97,11 +110,17 @@ function updateAll() {
 }
 
 // Attach updateAll to all sliders and buttons
-['textX','textY','rotate','scale','skewX','skewY'].forEach(id => {
+['userText','textX','textY','rotate','scale','skewX','skewY'].forEach(id => {
     document.getElementById(id).addEventListener('input', updateAll);
 });
 
-document.getElementById('generateBtn').addEventListener('click', updateAll);
+document.getElementById('generateBtn').addEventListener('click', function() {
+    updateAll();
+});
+document.getElementById('imageChoice').addEventListener('click', function() {
+    loadFromConfig();
+    updateAll();
+});
 
 // Save the image with the overlay text
 document.getElementById('saveBtn').onclick = () => {
@@ -113,3 +132,6 @@ document.getElementById('saveBtn').onclick = () => {
     link.download = 'image_with_text.png'; // Name of the downloaded file
     link.click();
 };
+
+// Load the initial image
+document.getElementById('imageChoice').click();
