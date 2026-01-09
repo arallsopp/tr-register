@@ -5,62 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Overlay Text on Image with Custom Font</title>
 
+    <!-- Define the Custom Font -->
     <style>
         @font-face {
             font-family: 'chalkboard';
-            src: url('assets/fonts/chalkboard.woff2') format('woff2');
+            src: url('assets/fonts/chalkboard.woff2') format('woff');
         }
 
         body {
             font-family: Arial, sans-serif;
         }
-    </style>
 
+        .controls {
+            margin-top: 10px;
+        }
+
+        input[type="text"] {
+            width: 300px;
+        }
+    </style>
 </head>
 <body>
 
 <!-- Canvas Element -->
-<canvas id="myCanvas" width="1536" height="1024"></canvas>
+<canvas id="myCanvas"></canvas>
 
-<!-- Button to Save Image -->
-<button id="saveBtn">Save Image</button>
+<!-- Controls to pick image and enter text -->
+<div class="controls">
+    <label for="imageChoice">Choose an Image:</label>
+    <select id="imageChoice">
+        <option value="image1" selected>Image 1</option>
+        <option value="image2">Image 2</option>
+    </select>
 
-<script>
-    // Get the canvas element and its context
-    const canvas = document.getElementById('myCanvas');
-    const ctx = canvas.getContext('2d');
+    <br><br>
 
-    // Load the image
-    const image = new Image();
-    image.src = 'assets/artwork/pub-lunch-landscape-master.png';
+    <label for="userText">Enter Text:</label>
+    <input type="text" id="userText" placeholder="Enter your text here">
 
-    // Wait until the font is loaded before rendering text
-    document.fonts.load('75px chalkboard').then(function() {
-        // When the font is loaded, we can proceed with drawing the image and text
-        image.onload = () => {
-            // Draw the image on the canvas once it loads
-            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    <br><br>
 
-            // Set the custom font for the text
-            ctx.font = '75px chalkboard'; // Use the custom font
-            ctx.fillStyle = 'white'; // Text color
-            ctx.textAlign = 'left'; // Left align the text
-            ctx.textBaseline = 'middle'; // Center vertically
-            ctx.fillText('Your names here', 450,850);
-        };
-    });
+    <button id="generateBtn">Generate Image</button>
+    <button id="saveBtn">Save Image</button>
+</div>
 
-    // Save the image with the overlay text
-    document.getElementById('saveBtn').onclick = () => {
-        const dataUrl = canvas.toDataURL('image/png');
-
-        // Create a temporary link to trigger the download
-        const link = document.createElement('a');
-        link.href = dataUrl;
-        link.download = 'tailored poster.png'; // Name of the downloaded file
-        link.click();
-    };
-</script>
-
+<script src="overlay-text.js"></script>
 </body>
 </html>
