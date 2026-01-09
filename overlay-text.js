@@ -19,7 +19,7 @@ const images = {
     image3: {
         name: 'Road Run',
         src: 'assets/artwork/road-run.png',
-        textPosition: {x: 609, y: 296},
+        textPosition: {x: 609, y: 305},
         fontSize: '50px',
         scale:1.3,
         skewX:0.01,

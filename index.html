@@ -3,11 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Overlay Text on Image with Custom Font</title>
+    <!-- UIkit CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.25.4/dist/css/uikit.min.css" />
+
+    <!-- UIkit JS -->
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.25.4/dist/js/uikit.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/uikit@3.25.4/dist/js/uikit-icons.min.js"></script>
+
     <link rel="stylesheet" href="overlay-text.css">
 </head>
 <body>
 <!-- Controls to pick image and enter text -->
+<!--HEADER-->
+<header id="site-head">
+    <div class="uk-container uk-container-expand">
+        <h2>Image Compositor</h2>
+        For Dorset TR Register
+    </div>
+</header>
+<!--/HEADER-->
+<div class="spacer"></div>
+<!--CARDS WRAPPER-->
+<section class="uk-section uk-section-small uk-section-default uk-padding-remove-bottom">
+    <div class="uk-container uk-container-expand uk-margin-large-bottom">
+        <ul class="uk-tab" uk-tab="connect: #my-tabs-content">
+            <li><a href="#">Image Creation</a></li>
+            <li><a href="#">Advanced</a></li>
+        </ul>
+
+        <ul id="my-tabs-content" class="uk-switcher uk-margin">
+            <li>
+                <form class="uk-form-horizontal uk-margin-large">
+
+                    <div class="uk-margin">
+                        <label class="uk-form-label" for="form-horizontal-text">Text</label>
+                        <div class="uk-form-controls">
+                            <input class="uk-input" id="form-horizontal-text" type="text" placeholder="Some text...">
+                        </div>
+                    </div>
+
+                    <div class="uk-margin">
+                        <label class="uk-form-label" for="form-horizontal-select">Select</label>
+                        <div class="uk-form-controls">
+                            <select class="uk-select" id="form-horizontal-select">
+                                <option>Option 01</option>
+                                <option>Option 02</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="uk-margin">
+                        <div class="uk-form-label">Radio</div>
+                        <div class="uk-form-controls uk-form-controls-text">
+                            <label><input class="uk-radio" type="radio" name="radio1"> Option 01</label><br>
+                            <label><input class="uk-radio" type="radio" name="radio1"> Option 02</label>
+                        </div>
+                    </div>
+
+                </form>
+            </li>
+            <li>Content for Tab 2</li>
+        </ul>
+    </div>
+</section>
+<!--/CARDS WRAPPER-->
+<!--FOOTER-->
+<footer id="site-foot" class="uk-section uk-section-secondary uk-section-xsmall">
+    <div class="uk-container uk-text-small uk-text-center">
+        <a href="https://github.com/zzseba78/Kick-Off">Created by KickOff</a> | Built with <a href="http://getuikit.com" title="Visit UIkit 3 site" target="_blank" data-uk-tooltip><span data-uk-icon="uikit"></span></a>
+    </div>
+</footer>
+
 <div class="controls">
     <label for="imageChoice">Choose an Image:</label>
     <select id="imageChoice"></select>
