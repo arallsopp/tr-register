@@ -6,14 +6,27 @@ const ctx = canvas.getContext('2d');
 // Image options
 const images = {
     image1: {
+        name: 'Pub Lunch Landscape',
         src: 'assets/artwork/pub-lunch-landscape-master.png',
-        textPosition: {x: 450, y: 850} // X/Y coordinates for Image 1
+        textPosition: {x: 450, y: 850},
+        fontSize: '75px'
     },
     image2: {
+        name: 'Pub Lunch Portrait',
         src: 'assets/artwork/pub-lunch-portrait-master.png',
-        textPosition: {x: 85, y: 1160} // X/Y coordinates for Image 2
+        textPosition: {x: 85, y: 1160},
+        fontSize: '50px'
     }
 };
+
+// Dynamically populate the select dropdown with image names
+const imageChoiceSelect = document.getElementById('imageChoice');
+Object.keys(images).forEach((key) => {
+    const option = document.createElement('option');
+    option.value = key; // Use the key as the value (e.g., 'image1')
+    option.textContent = images[key].name; // Display the name property
+    imageChoiceSelect.appendChild(option);
+});
 
 // Load custom font
 document.fonts.load('75px chalkboard').then(function () {
@@ -38,7 +51,9 @@ document.getElementById('generateBtn').onclick = () => {
         ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
         // Set the custom font for the text
-        ctx.font = '75px chalkboard'; // Use custom font
+        // Set the custom font for the text
+        const fontSize = images[selectedImage].fontSize || '75px'; // Use custom font size or default to 75px
+        ctx.font = `${fontSize} chalkboard`; // Use custom font
         ctx.fillStyle = 'white'; // Text color
         ctx.textAlign = 'left'; // Align text horizontally
         ctx.textBaseline = 'middle'; // Center text vertically
