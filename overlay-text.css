@@ -1,0 +1,20 @@
+@font-face {
+    font-family: 'chalkboard';
+    src: url('assets/fonts/chalkboard.woff2') format('woff');
+}
+
+body {
+    font-family: Arial, sans-serif;
+}
+
+.controls {
+    margin-top: 10px;
+}
+
+input[type="text"] {
+    width: 300px;
+}
+
+.scaledown{
+    transform: scale(0.5);
+}

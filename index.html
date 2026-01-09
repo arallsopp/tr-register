@@ -4,36 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Overlay Text on Image with Custom Font</title>
-
-    <!-- Define the Custom Font -->
-    <style>
-        @font-face {
-            font-family: 'chalkboard';
-            src: url('assets/fonts/chalkboard.woff2') format('woff');
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-        }
-
-        .controls {
-            margin-top: 10px;
-        }
-
-        input[type="text"] {
-            width: 300px;
-        }
-    </style>
+    <link rel="stylesheet" href="overlay-text.css">
 </head>
 <body>
-
-<!-- Canvas Element -->
-<canvas id="myCanvas"></canvas>
-
 <!-- Controls to pick image and enter text -->
 <div class="controls">
     <label for="imageChoice">Choose an Image:</label>
-    d    <select id="imageChoice"></select>
+    <select id="imageChoice"></select>
 
     <br><br>
 
@@ -45,6 +22,12 @@
     <button id="generateBtn">Generate Image</button>
     <button id="saveBtn">Save Image</button>
 </div>
+
+<!-- Canvas Element -->
+<div class="scaledown">
+    <canvas id="myCanvas"></canvas>
+</div>
+
 
 <script src="overlay-text.js"></script>
 </body>
