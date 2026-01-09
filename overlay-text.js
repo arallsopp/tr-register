@@ -16,6 +16,12 @@ const images = {
         src: 'assets/artwork/pub-lunch-portrait-master.png',
         textPosition: {x: 85, y: 1160},
         fontSize: '50px'
+    },
+    image3: {
+        name: 'Road Run',
+        src: 'assets/artwork/road-run.png',
+        textPosition: {x: 450, y: 850},
+        fontSize: '50px'
     }
 };
 
