@@ -22,9 +22,10 @@ const images = {
         textPosition: {x: 609, y: 296},
         fontSize: '50px',
         scale:1.3,
-        skewX:0.06,
+        skewX:0.01,
         skewY:0.08,
-        lineHeight: 43
+        lineHeight: 43,
+        font: 'harmattan'
     }
 };
 
@@ -38,7 +39,10 @@ Object.keys(images).forEach((key) => {
 });
 
 // Load custom font
-document.fonts.load('75px chalkboard').then(function () {
+Promise.all([
+    document.fonts.load('75px chalkboard'),
+    document.fonts.load('75px harmattan')
+]).then(() => {
     document.getElementById('generateBtn').disabled = false;
 });
 
@@ -63,7 +67,8 @@ function redrawCanvas(selectedImage, userText, x, y, rotation, scale, skewX, ske
 
         // Text setup
         const fontSize = images[selectedImage].fontSize || '75px';
-        ctx.font = `${fontSize} chalkboard`;
+        const fontName = images[selectedImage].font || 'chalkboard';
+        ctx.font = `${fontSize} ${fontName}`;
         ctx.fillStyle = 'white';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';

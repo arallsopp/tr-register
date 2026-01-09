@@ -2,6 +2,10 @@
     font-family: 'chalkboard';
     src: url('assets/fonts/chalkboard.woff2') format('woff');
 }
+@font-face {
+    font-family: 'harmattan';
+    src: url('assets/fonts/Harmattan-Bold.ttf') format('truetype');
+}
 
 body {
     font-family: Arial, sans-serif;
