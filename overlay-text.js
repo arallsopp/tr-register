@@ -39,99 +39,69 @@ document.fonts.load('75px chalkboard').then(function () {
 });
 
 // Helper function to reset the canvas and redraw everything
-function redrawCanvas(selectedImage, userText, x, y, rotation, scale) {
+// Helper function to redraw with transform
+function redrawCanvas(selectedImage, userText, x, y, rotation, scale, skewX, skewY) {
     const image = new Image();
     image.src = images[selectedImage].src;
 
     image.onload = () => {
-        // Resize canvas to image size
+        // Resize to the image
         canvas.width = image.width;
         canvas.height = image.height;
 
-        // Draw the image
+        // Draw base image
         ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
-        // Set the custom font and text properties
+        // Text setup
         const fontSize = images[selectedImage].fontSize || '75px';
         ctx.font = `${fontSize} chalkboard`;
         ctx.fillStyle = 'white';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
 
-        // Apply transformation (scaling, rotation, position)
-        ctx.save(); // Save the current state of the context
+        ctx.save();
 
-        // Apply scale and rotation based on slider values
-        ctx.translate(x, y); // Move to the text position
-        ctx.rotate((rotation * Math.PI) / 180); // Rotate (convert degrees to radians)
-        ctx.scale(scale, scale); // Apply scale
+        // Apply all transformations:
+        // 1) move to text base location
+        // 2) rotate
+        // 3) scale
+        // 4) skew (shear)
+        ctx.translate(x, y);
+        ctx.rotate((rotation * Math.PI) / 180);
+        ctx.scale(scale, scale);
 
-        // Draw the text at the transformed position
+        // Skew: change 2×2 matrix entries to shear the text
+        // ctx.transform(a, b, c, d, e, f)
+        // Here a=1, d=1 (normal scale),
+        // b=skewY, c=skewX (shear factors), e/f = 0
+        ctx.transform(1, skewY, skewX, 1, 0, 0);
+
         ctx.fillText(userText, 0, 0);
 
-        ctx.restore(); // Restore the original context state
+        ctx.restore();
     };
 }
 
-// Handle Image Choice and Text Generation
-document.getElementById('generateBtn').onclick = () => {
-    const selectedImage = document.getElementById('imageChoice').value;
-    const userText = document.getElementById('userText').value;
-
-    // Get current slider values
-    const x = parseFloat(document.getElementById('textX').value);
-    const y = parseFloat(document.getElementById('textY').value);
-    const rotation = parseFloat(document.getElementById('rotate').value);
-    const scale = parseFloat(document.getElementById('scale').value);
-
-    // Redraw the canvas with the selected image, user text, and transformations
-    redrawCanvas(selectedImage, userText, x, y, rotation, scale);
-};
-
-// Update canvas when slider values change
-document.getElementById('textX').addEventListener('input', () => {
-    const selectedImage = document.getElementById('imageChoice').value;
+// Call redraw on all slider changes
+function updateAll() {
+    const selectedImage = imageChoiceSelect.value;
     const userText = document.getElementById('userText').value;
     const x = parseFloat(document.getElementById('textX').value);
     const y = parseFloat(document.getElementById('textY').value);
     const rotation = parseFloat(document.getElementById('rotate').value);
     const scale = parseFloat(document.getElementById('scale').value);
+    const skewX = parseFloat(document.getElementById('skewX').value);
+    const skewY = parseFloat(document.getElementById('skewY').value);
 
-    redrawCanvas(selectedImage, userText, x, y, rotation, scale);
+    redrawCanvas(selectedImage, userText, x, y, rotation, scale, skewX, skewY);
+}
+
+// Attach updateAll to all sliders and buttons
+['textX','textY','rotate','scale','skewX','skewY'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateAll);
 });
 
-document.getElementById('textY').addEventListener('input', () => {
-    const selectedImage = document.getElementById('imageChoice').value;
-    const userText = document.getElementById('userText').value;
-    const x = parseFloat(document.getElementById('textX').value);
-    const y = parseFloat(document.getElementById('textY').value);
-    const rotation = parseFloat(document.getElementById('rotate').value);
-    const scale = parseFloat(document.getElementById('scale').value);
-
-    redrawCanvas(selectedImage, userText, x, y, rotation, scale);
-});
-
-document.getElementById('rotate').addEventListener('input', () => {
-    const selectedImage = document.getElementById('imageChoice').value;
-    const userText = document.getElementById('userText').value;
-    const x = parseFloat(document.getElementById('textX').value);
-    const y = parseFloat(document.getElementById('textY').value);
-    const rotation = parseFloat(document.getElementById('rotate').value);
-    const scale = parseFloat(document.getElementById('scale').value);
-
-    redrawCanvas(selectedImage, userText, x, y, rotation, scale);
-});
-
-document.getElementById('scale').addEventListener('input', () => {
-    const selectedImage = document.getElementById('imageChoice').value;
-    const userText = document.getElementById('userText').value;
-    const x = parseFloat(document.getElementById('textX').value);
-    const y = parseFloat(document.getElementById('textY').value);
-    const rotation = parseFloat(document.getElementById('rotate').value);
-    const scale = parseFloat(document.getElementById('scale').value);
-
-    redrawCanvas(selectedImage, userText, x, y, rotation, scale);
-});
+document.getElementById('generateBtn').addEventListener('click', updateAll);
 
 // Save the image with the overlay text
 document.getElementById('saveBtn').onclick = () => {
