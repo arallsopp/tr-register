@@ -8,7 +8,7 @@ body {
     background-color: #222;
     color: #aaa;
 }
-input, select{
+input, select, textarea{
     border:1px solid #8d8d8d;
     background:#222;
     color:#aaa;

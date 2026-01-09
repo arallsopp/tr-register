@@ -24,6 +24,7 @@ const images = {
         scale:1.3,
         skewX:0.06,
         skewY:0.08,
+        lineHeight: 43
     }
 };
 
@@ -41,6 +42,12 @@ document.fonts.load('75px chalkboard').then(function () {
     document.getElementById('generateBtn').disabled = false;
 });
 
+function drawMultilineText(ctx, text, lineHeight) {
+    const lines = text.split('\n');
+    lines.forEach((line, index) => {
+        ctx.fillText(line, 0, index * lineHeight);
+    });
+}
 // Helper function to redraw with transform
 function redrawCanvas(selectedImage, userText, x, y, rotation, scale, skewX, skewY) {
     const image = new Image();
@@ -78,7 +85,10 @@ function redrawCanvas(selectedImage, userText, x, y, rotation, scale, skewX, ske
         // b=skewY, c=skewX (shear factors), e/f = 0
         ctx.transform(1, skewY, skewX, 1, 0, 0);
 
-        ctx.fillText(userText, 0, 0);
+        // Draw multiline text
+        const fontPx = parseInt(fontSize, 10);
+        const lineHeight = images[selectedImage].lineHeight || fontPx * 1.2;
+        drawMultilineText(ctx, userText, lineHeight);
 
         ctx.restore();
     };
@@ -87,7 +97,6 @@ function redrawCanvas(selectedImage, userText, x, y, rotation, scale, skewX, ske
 // Call redraw on all slider changes
 function loadFromConfig() {
     const selectedImage = imageChoiceSelect.value;
-    debugger;
     document.getElementById('textX').value = images[selectedImage].textPosition.x;
     document.getElementById('textY').value = images[selectedImage].textPosition.y;
     document.getElementById('scale').value = images[selectedImage].scale || 1;
