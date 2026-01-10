@@ -34,9 +34,26 @@ const images = {
         font: 'harmattan',
         lineCount: 2,
         sampleText: "BRIAN & LINDA'S\n" +
-            "DRIVE IT DAY, APR.  26\n",
+            "DRIVE IT DAY, APR.  26",
         colour: "rgba(255, 255, 255, 0.95)"
+    },
+    image4: {
+        name: 'Monthly Meeting',
+        src: 'assets/artwork/monthly-meeting.png',
+        textPosition: {x: 770, y: 385},
+        fontSize: '50px',
+        lineHeight: 43,
+        font: 'harmattan',
+        lineCount: 1,
+        sampleText: "FEBRUARY 12TH",
+        colour: "rgb(244,235,194)",
+        shadowColor: "rgba(0, 0, 0, 1)",
+        shadowBlur: 6,
+        shadowOffsetX: 1,
+        shadowOffsetY: 1,
+        textAlign:'center'
     }
+
 };
 
 // Dynamically populate the select dropdown with image names
@@ -81,7 +98,8 @@ function redrawCanvas(selectedImage, userText, x, y, rotation, scale, skewX, ske
         const fontName = images[selectedImage].font || 'chalkboard';
         ctx.font = `${fontSize} ${fontName}`;
         ctx.fillStyle = images[selectedImage].colour || 'white';
-        ctx.textAlign = 'left';
+        ctx.textAlign = images[selectedImage].textAlign || "left";
+
         ctx.textBaseline = 'middle';
 
         ctx.save();
@@ -104,6 +122,12 @@ function redrawCanvas(selectedImage, userText, x, y, rotation, scale, skewX, ske
         // Draw multiline text
         const fontPx = parseInt(fontSize, 10);
         const lineHeight = images[selectedImage].lineHeight || fontPx * 1.2;
+
+        ctx.shadowColor = images[selectedImage].shadowColor || "rgba(0, 0, 0, 0.0)";
+        ctx.shadowBlur = images[selectedImage].shadowBlur || 0;
+        ctx.shadowOffsetX = images[selectedImage].shadowOffsetX || 0;
+        ctx.shadowOffsetY = images[selectedImage].shadowOffsetY || 0;
+
         drawMultilineText(ctx, userText, lineHeight);
 
         ctx.restore();
