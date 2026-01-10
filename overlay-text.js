@@ -52,6 +52,19 @@ const images = {
         shadowOffsetX: 1,
         shadowOffsetY: 1,
         textAlign:'center'
+    },
+    image5: {
+        name: 'Generic Driving',
+        src: 'assets/artwork/corfe-drive.png',
+        textPosition: {x: 755, y: 801},
+        fontSize: '50px',
+        lineHeight: 43,
+        font: 'harmattan',
+        lineCount: 2,
+        scale:1.1,
+        sampleText: "TEXT LINE     1\n" +
+            "MORE  DETAIL     2",
+        colour: "rgba(255, 255, 255, 0.95)"
     }
 
 };
