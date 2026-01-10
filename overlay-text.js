@@ -52,8 +52,9 @@ const images = {
             },
             lines: [
                 { text: 'Steve and SaNdra' },
-                { text: 'The "BOTANY BAY INNE"' },
-                { text: "12:30 - 22ND FEBRUARY '26" }
+                { text: '22ND FEBRUARY \'26\n\n' +
+                        'The "BOTANY BAY INNE", DT11 9ET',
+                    transform: { scale: 0.8 }}
             ]
         }
     },
@@ -79,7 +80,7 @@ const images = {
                 shadow: null
             },
             lines: [
-                { text: "BRIAN & LINDA'S" },
+                { text: "BRIAN AND LINDA'S" },
                 { text: 'DRIVE IT DAY, APR.  26' }
             ]
         }
@@ -181,6 +182,23 @@ Promise.all([
     document.fonts.load('75px racing')
 ]);
 
+function resolveLinesWithInheritance(configLines, userText) {
+    if (!userText) return configLines;
+
+    const textLines = userText.split('\n');
+
+    return textLines.map((text, i) => {
+        const baseLine =
+            configLines[i] ??
+            configLines[configLines.length - 1] ??
+            {};
+
+        return {
+            ...baseLine,
+            text
+        };
+    });
+}
 function renderTextBlock(ctx, block, userTextOverride) {
     const { transform, defaultStyle, lines } = block;
 
@@ -197,12 +215,7 @@ function renderTextBlock(ctx, block, userTextOverride) {
     ctx.textAlign = defaultStyle.align;
     ctx.textBaseline = 'middle';
 
-    const activeLines = userTextOverride
-        ? userTextOverride.split('\n').map((text, i) => ({
-            ...lines[i],        // preserve transform, style, etc
-            text                // override only the text
-        }))
-        : lines;
+    const activeLines = resolveLinesWithInheritance(lines, userTextOverride);
 
     activeLines.forEach((line, index) => {
         const style = { ...defaultStyle, ...line.style };
