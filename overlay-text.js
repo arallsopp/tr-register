@@ -80,7 +80,7 @@ const images = {
             },
             lines: [
                 { text: "BRIAN & LINDA'S" },
-                { text: 'DRIVE IT DAY, APR. 26' }
+                { text: 'DRIVE IT DAY, APR.  26' }
             ]
         }
     },
@@ -137,8 +137,8 @@ const images = {
                 shadow: null
             },
             lines: [
-                { text: 'LULWORTH MAY 17' },
-                { text: 'BRESSUIRE JUNE 21' }
+                { text: 'LULWORTH MAY        17' },
+                { text: 'BRESSUIRE JUNE       21' }
             ]
         }
     },
@@ -198,7 +198,10 @@ function renderTextBlock(ctx, block, userTextOverride) {
     ctx.textBaseline = 'middle';
 
     const activeLines = userTextOverride
-        ? userTextOverride.split('\n').map(t => ({ text: t }))
+        ? userTextOverride.split('\n').map((text, i) => ({
+            ...lines[i],        // preserve transform, style, etc
+            text                // override only the text
+        }))
         : lines;
 
     activeLines.forEach((line, index) => {
