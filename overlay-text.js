@@ -74,11 +74,11 @@ const images = {
         lineHeight: 43,
         font: 'racing',
         lineCount: 2,
-        scale:1.4,
+        scale:1.5,
         sampleText: "Thruxton Retro\n" +
             "3rd - 5th July 2026",
-        colour: "rgba(255, 255, 255, 0.95)",
-        line2_scale: 0.7
+        colour: "rgb(38,62,47)",
+        line2_scale: 0.7,
     }
 
 };
@@ -103,8 +103,6 @@ Promise.all([
 
 function drawMultilineText(ctx, text, lineHeight, line2_scale) {
     const lines = text.split('\n');
-    let originalScaleX = ctx.getTransform().a; // Store original scale
-    let originalScaleY = ctx.getTransform().d; // Store original scale
 
     lines.forEach((line, index) => {
         if (index === 1) {
@@ -113,11 +111,8 @@ function drawMultilineText(ctx, text, lineHeight, line2_scale) {
         }
 
         ctx.fillText(line, 0, index * lineHeight);
-
-        if (index === 1) {
-            ctx.restore(); // Restore the context to the original state
-        }
     });
+    ctx.restore();
 }
 // Helper function to redraw with transform
 function redrawCanvas(selectedImage, userText, x, y, rotation, scale, skewX, skewY) {
