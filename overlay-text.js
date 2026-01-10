@@ -6,7 +6,7 @@ const ctx = canvas.getContext('2d');
 const images = {
     image1: {
         name: 'Pub Lunch Landscape',
-        src: 'assets/artwork/pub-lunch-landscape-master.png',
+        src: 'assets/artwork/pub-lunch-landscape-master.jpg',
         textPosition: {x: 450, y: 850},
         fontSize: '75px',
         lineCount: 1,
@@ -14,7 +14,7 @@ const images = {
     },
     image2: {
         name: 'Pub Lunch Portrait',
-        src: 'assets/artwork/pub-lunch-portrait-master.png',
+        src: 'assets/artwork/pub-lunch-portrait-master.jpg',
         textPosition: {x: 85, y: 1160},
         fontSize: '50px',
         lineCount: 3,
@@ -24,7 +24,7 @@ const images = {
     },
     image3: {
         name: 'Road Run',
-        src: 'assets/artwork/road-run.png',
+        src: 'assets/artwork/road-run.jpg',
         textPosition: {x: 609, y: 305},
         fontSize: '50px',
         scale:1.3,
@@ -39,7 +39,7 @@ const images = {
     },
     image4: {
         name: 'Monthly Meeting',
-        src: 'assets/artwork/monthly-meeting.png',
+        src: 'assets/artwork/monthly-meeting.jpg',
         textPosition: {x: 770, y: 385},
         fontSize: '50px',
         lineHeight: 43,
@@ -55,7 +55,7 @@ const images = {
     },
     image5: {
         name: 'Generic Driving',
-        src: 'assets/artwork/corfe-drive.png',
+        src: 'assets/artwork/corfe-drive.jpg',
         textPosition: {x: 755, y: 801},
         fontSize: '50px',
         lineHeight: 43,
