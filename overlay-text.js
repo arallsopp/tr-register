@@ -193,6 +193,11 @@ document.getElementById('imageChoice').addEventListener('click', function() {
     loadFromConfig();
     updateAll();
 });
+document.getElementById('imageChoice').addEventListener('change', function() {
+    /* required as mobile can miss the click */
+    loadFromConfig();
+    updateAll();
+});
 document.getElementById('loadExampleBtn').addEventListener('click', function() {
     loadFromConfig(true);
     updateAll();
