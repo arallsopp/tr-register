@@ -62,8 +62,8 @@ const images = {
         font: 'harmattan',
         lineCount: 2,
         scale:1.1,
-        sampleText: "TEXT LINE     1\n" +
-            "MORE  DETAIL     2",
+        sampleText: "LULWORTH MAY   17\n" +
+            "BRESSUIRE JUNE    21",
         colour: "rgba(255, 255, 255, 0.95)"
     }
 
@@ -190,12 +190,12 @@ function updateAll() {
 });
 
 document.getElementById('imageChoice').addEventListener('click', function() {
-    loadFromConfig();
+    loadFromConfig(true);
     updateAll();
 });
 document.getElementById('imageChoice').addEventListener('change', function() {
     /* required as mobile can miss the click */
-    loadFromConfig();
+    loadFromConfig(true);
     updateAll();
 });
 document.getElementById('loadExampleBtn').addEventListener('click', function() {
