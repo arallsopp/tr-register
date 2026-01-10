@@ -6,6 +6,10 @@
     font-family: 'harmattan';
     src: url('assets/fonts/Harmattan-Bold.ttf') format('truetype');
 }
+@font-face {
+    font-family: 'racing';
+    src: url('assets/fonts/RacingSansOne-Regular.ttf') format('truetype');
+}
 
 .canvas-container{
     width: 100%;

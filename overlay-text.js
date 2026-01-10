@@ -65,6 +65,20 @@ const images = {
         sampleText: "LULWORTH MAY   17\n" +
             "BRESSUIRE JUNE    21",
         colour: "rgba(255, 255, 255, 0.95)"
+    }, image6: {
+        name: 'Racing',
+        src: 'assets/artwork/racing-tr3.jpg',
+        textPosition: {x: 1310, y: 82},
+        textAlign:'right',
+        fontSize: '50px',
+        lineHeight: 43,
+        font: 'racing',
+        lineCount: 2,
+        scale:1.4,
+        sampleText: "Thruxton Retro\n" +
+            "3rd - 5th July 2026",
+        colour: "rgba(255, 255, 255, 0.95)",
+        line2_scale: 0.7
     }
 
 };
@@ -81,17 +95,29 @@ Object.keys(images).forEach((key) => {
 // Load custom font
 Promise.all([
     document.fonts.load('75px chalkboard'),
-    document.fonts.load('75px harmattan')
+    document.fonts.load('75px harmattan'),
+    document.fonts.load('75px racing'),
 ]).then(() => {
     //we are ready
 });
 
-function drawMultilineText(ctx, text, lineHeight) {
+function drawMultilineText(ctx, text, lineHeight, line2_scale) {
     const lines = text.split('\n');
+    let originalScaleX = ctx.getTransform().a; // Store original scale
+    let originalScaleY = ctx.getTransform().d; // Store original scale
+
     lines.forEach((line, index) => {
+        if (index === 1) {
+            ctx.save(); // Save the current context state
+            ctx.scale(line2_scale, line2_scale); // Scale only for the second line
+        }
+
         ctx.fillText(line, 0, index * lineHeight);
+
+        if (index === 1) {
+            ctx.restore(); // Restore the context to the original state
+        }
     });
-    ctx.opacity = 1;
 }
 // Helper function to redraw with transform
 function redrawCanvas(selectedImage, userText, x, y, rotation, scale, skewX, skewY) {
@@ -147,7 +173,7 @@ function redrawCanvas(selectedImage, userText, x, y, rotation, scale, skewX, ske
         ctx.shadowOffsetX = images[selectedImage].shadowOffsetX || 0;
         ctx.shadowOffsetY = images[selectedImage].shadowOffsetY || 0;
 
-        drawMultilineText(ctx, userText, lineHeight);
+        drawMultilineText(ctx, userText, lineHeight, images[selectedImage].line2_scale || 1);
 
         ctx.restore();
     };
