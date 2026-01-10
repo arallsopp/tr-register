@@ -200,12 +200,23 @@ document.getElementById('loadExampleBtn').addEventListener('click', function() {
 
 // Save the image with the overlay text
 document.getElementById('saveBtn').onclick = () => {
-    const dataUrl = canvas.toDataURL('image/png');
+    // SheepCRM hated my images. Might have been the meta data on the PNG, not sure.
+    // Saving as jpeg might solve that?
+    const ctx = canvas.getContext("2d");
 
-    // Create a temporary link to trigger the download
-    const link = document.createElement('a');
+    // Ensure a solid background (JPEG has no alpha)
+    ctx.save();
+    ctx.globalCompositeOperation = "destination-over";
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.restore();
+
+    // Explicit MIME type + quality
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+
+    const link = document.createElement("a");
     link.href = dataUrl;
-    link.download = 'image_with_text.png'; // Name of the downloaded file
+    link.download = "image_with_text.jpg";
     link.click();
 };
 
