@@ -103,6 +103,12 @@ function redrawCanvas(selectedImage, userText, x, y, rotation, scale, skewX, ske
         canvas.width = image.width;
         canvas.height = image.height;
 
+        /* lose the alpha channel as SheepCRM maybe has an issue with it?
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        --nope. its not that. */
+
+
         // Draw base image
         ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
