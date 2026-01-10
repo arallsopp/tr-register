@@ -9,14 +9,18 @@ const images = {
         src: 'assets/artwork/pub-lunch-landscape-master.png',
         textPosition: {x: 450, y: 850},
         fontSize: '75px',
-        lineCount: 1
+        lineCount: 1,
+        sampleText: "Steve and SaNdra"
     },
     image2: {
         name: 'Pub Lunch Portrait',
         src: 'assets/artwork/pub-lunch-portrait-master.png',
         textPosition: {x: 85, y: 1160},
         fontSize: '50px',
-        lineCount: 3
+        lineCount: 3,
+        sampleText: "Steve and SaNdra\n" +
+            "The \"BOTANY BAY INNE\"\n" +
+            "12:30 - 22ND FEBRUARY '26"
     },
     image3: {
         name: 'Road Run',
@@ -28,7 +32,10 @@ const images = {
         skewY:0.08,
         lineHeight: 43,
         font: 'harmattan',
-        lineCount: 2
+        lineCount: 2,
+        sampleText: "BRIAN & LINDA'S\n" +
+            "DRIVE IT DAY, APR.  26\n",
+        colour: "rgba(255, 255, 255, 0.95)"
     }
 };
 
@@ -54,6 +61,7 @@ function drawMultilineText(ctx, text, lineHeight) {
     lines.forEach((line, index) => {
         ctx.fillText(line, 0, index * lineHeight);
     });
+    ctx.opacity = 1;
 }
 // Helper function to redraw with transform
 function redrawCanvas(selectedImage, userText, x, y, rotation, scale, skewX, skewY) {
@@ -72,7 +80,7 @@ function redrawCanvas(selectedImage, userText, x, y, rotation, scale, skewX, ske
         const fontSize = images[selectedImage].fontSize || '75px';
         const fontName = images[selectedImage].font || 'chalkboard';
         ctx.font = `${fontSize} ${fontName}`;
-        ctx.fillStyle = 'white';
+        ctx.fillStyle = images[selectedImage].colour || 'white';
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
 
@@ -103,7 +111,7 @@ function redrawCanvas(selectedImage, userText, x, y, rotation, scale, skewX, ske
 }
 
 // Call redraw on all slider changes
-function loadFromConfig() {
+function loadFromConfig(useSample = false) {
     const selectedImage = imageChoiceSelect.value;
     document.getElementById('textX').value = images[selectedImage].textPosition.x;
     document.getElementById('textY').value = images[selectedImage].textPosition.y;
@@ -115,6 +123,9 @@ function loadFromConfig() {
         images[selectedImage].lineCount
             ? `(prefers ${images[selectedImage].lineCount} line${(images[selectedImage].lineCount > 1 ? 's' : '')})`
             : ''
+    if(useSample) {
+        document.getElementById('userText').value = images[selectedImage].sampleText || "Your Text Here"
+    }
 }
 
 function updateAll() {
@@ -140,6 +151,10 @@ document.getElementById('generateBtn').addEventListener('click', function() {
 });
 document.getElementById('imageChoice').addEventListener('click', function() {
     loadFromConfig();
+    updateAll();
+});
+document.getElementById('sampleBtn').addEventListener('click', function() {
+    loadFromConfig(true);
     updateAll();
 });
 
