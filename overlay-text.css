@@ -10,3 +10,8 @@
 .canvas-container {
     zoom: 0.5;
 }
+.form-label{
+    opacity: 0.5;
+    font-size: 0.8em;
+    margin-bottom:0.2rem;
+}

@@ -8,13 +8,15 @@ const images = {
         name: 'Pub Lunch Landscape',
         src: 'assets/artwork/pub-lunch-landscape-master.png',
         textPosition: {x: 450, y: 850},
-        fontSize: '75px'
+        fontSize: '75px',
+        lineCount: 1
     },
     image2: {
         name: 'Pub Lunch Portrait',
         src: 'assets/artwork/pub-lunch-portrait-master.png',
         textPosition: {x: 85, y: 1160},
-        fontSize: '50px'
+        fontSize: '50px',
+        lineCount: 3
     },
     image3: {
         name: 'Road Run',
@@ -25,7 +27,8 @@ const images = {
         skewX:0.01,
         skewY:0.08,
         lineHeight: 43,
-        font: 'harmattan'
+        font: 'harmattan',
+        lineCount: 2
     }
 };
 
@@ -108,6 +111,10 @@ function loadFromConfig() {
     document.getElementById('rotate').value = images[selectedImage].rotate || 0;
     document.getElementById('skewX').value = images[selectedImage].skewX || 0;
     document.getElementById('skewY').value = images[selectedImage].skewY || 0;
+    document.getElementById('line-count-preference').textContent =
+        images[selectedImage].lineCount
+            ? `(prefers ${images[selectedImage].lineCount} line${(images[selectedImage].lineCount > 1 ? 's' : '')})`
+            : ''
 }
 
 function updateAll() {
