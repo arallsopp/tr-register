@@ -7,8 +7,13 @@
     src: url('assets/fonts/Harmattan-Bold.ttf') format('truetype');
 }
 
-.canvas-container {
-    zoom: 0.5;
+.canvas-container{
+    width: 100%;
+}
+.canvas-container canvas{
+    width: 100%;
+    height: auto;
+    display: block;
 }
 .form-label{
     opacity: 0.5;
