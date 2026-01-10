@@ -2,249 +2,315 @@
 const canvas = document.getElementById('myCanvas');
 const ctx = canvas.getContext('2d');
 
-// Image options (same as before)
+// Image options (refactored)
 const images = {
     image1: {
-        name: 'Pub Lunch Landscape',
-        src: 'assets/artwork/pub-lunch-landscape-master.jpg',
-        textPosition: {x: 450, y: 850},
-        fontSize: '75px',
-        lineCount: 1,
-        sampleText: "Steve and SaNdra"
+        meta: {
+            name: 'Pub Lunch Landscape',
+            src: 'assets/artwork/pub-lunch-landscape-master.jpg'
+        },
+        textBlock: {
+            transform: {
+                position: { x: 450, y: 850 },
+                rotate: 0,
+                scale: 1,
+                skew: { x: 0, y: 0 }
+            },
+            defaultStyle: {
+                font: 'chalkboard',
+                size: 75,
+                color: 'white',
+                align: 'left',
+                lineHeight: 90,
+                shadow: null
+            },
+            lines: [
+                { text: 'Steve and SaNdra' }
+            ]
+        }
     },
+
     image2: {
-        name: 'Pub Lunch Portrait',
-        src: 'assets/artwork/pub-lunch-portrait-master.jpg',
-        textPosition: {x: 85, y: 1160},
-        fontSize: '50px',
-        lineCount: 3,
-        sampleText: "Steve and SaNdra\n" +
-            "The \"BOTANY BAY INNE\"\n" +
-            "12:30 - 22ND FEBRUARY '26"
+        meta: {
+            name: 'Pub Lunch Portrait',
+            src: 'assets/artwork/pub-lunch-portrait-master.jpg'
+        },
+        textBlock: {
+            transform: {
+                position: { x: 85, y: 1160 },
+                rotate: 0,
+                scale: 1,
+                skew: { x: 0, y: 0 }
+            },
+            defaultStyle: {
+                font: 'chalkboard',
+                size: 50,
+                color: 'white',
+                align: 'left',
+                lineHeight: 60,
+                shadow: null
+            },
+            lines: [
+                { text: 'Steve and SaNdra' },
+                { text: 'The "BOTANY BAY INNE"' },
+                { text: "12:30 - 22ND FEBRUARY '26" }
+            ]
+        }
     },
+
     image3: {
-        name: 'Road Run',
-        src: 'assets/artwork/road-run.jpg',
-        textPosition: {x: 609, y: 305},
-        fontSize: '50px',
-        scale:1.3,
-        skewX:0.01,
-        skewY:0.08,
-        lineHeight: 43,
-        font: 'harmattan',
-        lineCount: 2,
-        sampleText: "BRIAN & LINDA'S\n" +
-            "DRIVE IT DAY, APR.  26",
-        colour: "rgba(251,229,215,0.9)"
+        meta: {
+            name: 'Road Run',
+            src: 'assets/artwork/road-run.jpg'
+        },
+        textBlock: {
+            transform: {
+                position: { x: 609, y: 305 },
+                rotate: 0,
+                scale: 1.3,
+                skew: { x: 0.01, y: 0.08 }
+            },
+            defaultStyle: {
+                font: 'harmattan',
+                size: 50,
+                color: 'rgba(251,229,215,0.9)',
+                align: 'left',
+                lineHeight: 43,
+                shadow: null
+            },
+            lines: [
+                { text: "BRIAN & LINDA'S" },
+                { text: 'DRIVE IT DAY, APR. 26' }
+            ]
+        }
     },
+
     image4: {
-        name: 'Monthly Meeting',
-        src: 'assets/artwork/monthly-meeting.jpg',
-        textPosition: {x: 770, y: 385},
-        fontSize: '50px',
-        lineHeight: 43,
-        font: 'harmattan',
-        lineCount: 1,
-        sampleText: "FEBRUARY 12TH",
-        colour: "rgb(244,235,194)",
-        shadowColor: "rgba(0, 0, 0, 1)",
-        shadowBlur: 6,
-        shadowOffsetX: 1,
-        shadowOffsetY: 1,
-        textAlign:'center'
+        meta: {
+            name: 'Monthly Meeting',
+            src: 'assets/artwork/monthly-meeting.jpg'
+        },
+        textBlock: {
+            transform: {
+                position: { x: 770, y: 385 },
+                rotate: 0,
+                scale: 1,
+                skew: { x: 0, y: 0 }
+            },
+            defaultStyle: {
+                font: 'harmattan',
+                size: 50,
+                color: 'rgb(244,235,194)',
+                align: 'center',
+                lineHeight: 43,
+                shadow: {
+                    shadowColor: 'rgba(0,0,0,1)',
+                    shadowBlur: 6,
+                    shadowOffsetX: 1,
+                    shadowOffsetY: 1
+                }
+            },
+            lines: [
+                { text: 'FEBRUARY 12TH' }
+            ]
+        }
     },
+
     image5: {
-        name: 'Generic Driving',
-        src: 'assets/artwork/corfe-drive.jpg',
-        textPosition: {x: 755, y: 801},
-        fontSize: '50px',
-        lineHeight: 43,
-        font: 'harmattan',
-        lineCount: 2,
-        scale:1.1,
-        sampleText: "LULWORTH MAY   17\n" +
-            "BRESSUIRE JUNE    21",
-        colour: "rgba(255, 255, 255, 0.95)"
-    }, image6: {
-        name: 'Racing',
-        src: 'assets/artwork/racing-tr3.jpg',
-        textPosition: {x: 1310, y: 82},
-        textAlign:'right',
-        fontSize: '50px',
-        lineHeight: 43,
-        font: 'racing',
-        lineCount: 2,
-        scale:1.5,
-        sampleText: "Thruxton Retro\n" +
-            "3rd - 5th July 2026",
-        colour: "rgb(38,62,47)",
-        line2_scale: 0.7,
+        meta: {
+            name: 'Generic Driving',
+            src: 'assets/artwork/corfe-drive.jpg'
+        },
+        textBlock: {
+            transform: {
+                position: { x: 755, y: 801 },
+                rotate: 0,
+                scale: 1.1,
+                skew: { x: 0, y: 0 }
+            },
+            defaultStyle: {
+                font: 'harmattan',
+                size: 50,
+                color: 'rgba(255,255,255,0.95)',
+                align: 'left',
+                lineHeight: 43,
+                shadow: null
+            },
+            lines: [
+                { text: 'LULWORTH MAY 17' },
+                { text: 'BRESSUIRE JUNE 21' }
+            ]
+        }
+    },
+
+    image6: {
+        meta: {
+            name: 'Racing',
+            src: 'assets/artwork/racing-tr3.jpg'
+        },
+        textBlock: {
+            transform: {
+                position: { x: 1310, y: 82 },
+                rotate: 0,
+                scale: 1.5,
+                skew: { x: 0, y: 0 }
+            },
+            defaultStyle: {
+                font: 'racing',
+                size: 50,
+                color: 'rgb(38,62,47)',
+                align: 'right',
+                lineHeight: 43,
+                shadow: null
+            },
+            lines: [
+                { text: 'Thruxton Retro' },
+                {
+                    text: '3rd - 5th July 2026',
+                    transform: { scale: 0.7 }
+                }
+            ]
+        }
     }
-
 };
-
-// Dynamically populate the select dropdown with image names
-const imageChoiceSelect = document.getElementById('imageChoice');
-Object.keys(images).forEach((key) => {
-    const option = document.createElement('option');
-    option.value = key;
-    option.textContent = images[key].name;
-    imageChoiceSelect.appendChild(option);
-});
 
 // Load custom font
 Promise.all([
     document.fonts.load('75px chalkboard'),
     document.fonts.load('75px harmattan'),
-    document.fonts.load('75px racing'),
-]).then(() => {
-    //we are ready
-});
+    document.fonts.load('75px racing')
+]);
 
-function drawMultilineText(ctx, text, lineHeight, line2_scale) {
-    const lines = text.split('\n');
+function renderTextBlock(ctx, block, userTextOverride) {
+    const { transform, defaultStyle, lines } = block;
 
-    lines.forEach((line, index) => {
-        if (index === 1) {
-            ctx.save(); // Save the current context state
-            ctx.scale(line2_scale, line2_scale); // Scale only for the second line
-        }
+    ctx.save();
 
-        ctx.fillText(line, 0, index * lineHeight);
-    });
-    ctx.restore();
-}
-// Helper function to redraw with transform
-function redrawCanvas(selectedImage, userText, x, y, rotation, scale, skewX, skewY) {
-    const image = new Image();
-    image.src = images[selectedImage].src;
+    ctx.translate(transform.position.x, transform.position.y);
+    ctx.rotate((transform.rotate || 0) * Math.PI / 180);
+    ctx.scale(transform.scale || 1, transform.scale || 1);
 
-    image.onload = () => {
-        // Resize to the image
-        canvas.width = image.width;
-        canvas.height = image.height;
+    if (transform.skew) {
+        ctx.transform(1, transform.skew.y || 0, transform.skew.x || 0, 1, 0, 0);
+    }
 
-        /* lose the alpha channel as SheepCRM maybe has an issue with it?
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        --nope. its not that. */
+    ctx.textAlign = defaultStyle.align;
+    ctx.textBaseline = 'middle';
 
+    const activeLines = userTextOverride
+        ? userTextOverride.split('\n').map(t => ({ text: t }))
+        : lines;
 
-        // Draw base image
-        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-        // Text setup
-        const fontSize = images[selectedImage].fontSize || '75px';
-        const fontName = images[selectedImage].font || 'chalkboard';
-        ctx.font = `${fontSize} ${fontName}`;
-        ctx.fillStyle = images[selectedImage].colour || 'white';
-        ctx.textAlign = images[selectedImage].textAlign || "left";
-
-        ctx.textBaseline = 'middle';
+    activeLines.forEach((line, index) => {
+        const style = { ...defaultStyle, ...line.style };
+        const lineTransform = line.transform || {};
 
         ctx.save();
 
-        // Apply all transformations:
-        // 1) move to text base location
-        // 2) rotate
-        // 3) scale
-        // 4) skew (shear)
-        ctx.translate(x, y);
-        ctx.rotate((rotation * Math.PI) / 180);
-        ctx.scale(scale, scale);
+        if (lineTransform.scale) {
+            ctx.scale(lineTransform.scale, lineTransform.scale);
+        }
 
-        // Skew: change 2×2 matrix entries to shear the text
-        // ctx.transform(a, b, c, d, e, f)
-        // Here a=1, d=1 (normal scale),
-        // b=skewY, c=skewX (shear factors), e/f = 0
-        ctx.transform(1, skewY, skewX, 1, 0, 0);
+        ctx.font = `${style.size}px ${style.font}`;
+        ctx.fillStyle = style.color;
 
-        // Draw multiline text
-        const fontPx = parseInt(fontSize, 10);
-        const lineHeight = images[selectedImage].lineHeight || fontPx * 1.2;
+        if (style.shadow) {
+            Object.assign(ctx, style.shadow);
+        } else {
+            ctx.shadowColor = 'transparent';
+        }
 
-        ctx.shadowColor = images[selectedImage].shadowColor || "rgba(0, 0, 0, 0.0)";
-        ctx.shadowBlur = images[selectedImage].shadowBlur || 0;
-        ctx.shadowOffsetX = images[selectedImage].shadowOffsetX || 0;
-        ctx.shadowOffsetY = images[selectedImage].shadowOffsetY || 0;
-
-        drawMultilineText(ctx, userText, lineHeight, images[selectedImage].line2_scale || 1);
+        ctx.fillText(
+            line.text,
+            0,
+            index * style.lineHeight
+        );
 
         ctx.restore();
+    });
+
+    ctx.restore();
+}
+
+
+function renderImage(imageConfig, userText) {
+    const img = new Image();
+    img.src = imageConfig.meta.src;
+
+    img.onload = () => {
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        ctx.drawImage(img, 0, 0);
+        renderTextBlock(ctx, imageConfig.textBlock, userText);
     };
 }
 
-// Call redraw on all slider changes
+
+// UI Wiring
+const imageChoiceSelect = document.getElementById('imageChoice');
+
+Object.entries(images).forEach(([key, img]) => {
+    const option = document.createElement('option');
+    option.value = key;
+    option.textContent = img.meta.name;
+    imageChoiceSelect.appendChild(option);
+});
+
 function loadFromConfig(useSample = false) {
-    const selectedImage = imageChoiceSelect.value;
-    document.getElementById('textX').value = images[selectedImage].textPosition.x;
-    document.getElementById('textY').value = images[selectedImage].textPosition.y;
-    document.getElementById('scale').value = images[selectedImage].scale || 1;
-    document.getElementById('rotate').value = images[selectedImage].rotate || 0;
-    document.getElementById('skewX').value = images[selectedImage].skewX || 0;
-    document.getElementById('skewY').value = images[selectedImage].skewY || 0;
-    document.getElementById('line-count-preference').textContent =
-        images[selectedImage].lineCount
-            ? `(prefers ${images[selectedImage].lineCount} line${(images[selectedImage].lineCount > 1 ? 's' : '')})`
-            : ''
-    if(useSample) {
-        document.getElementById('userText').value = images[selectedImage].sampleText || "Your Text Here"
+    const img = images[imageChoiceSelect.value];
+    const t = img.textBlock.transform;
+
+    textX.value = t.position.x;
+    textY.value = t.position.y;
+    scale.value = t.scale || 1;
+    rotate.value = t.rotate || 0;
+    skewX.value = t.skew?.x || 0;
+    skewY.value = t.skew?.y || 0;
+
+    if (useSample) {
+        userText.value = img.textBlock.lines.map(l => l.text).join('\n');
     }
 }
 
 function updateAll() {
-    const selectedImage = imageChoiceSelect.value;
-    const userText = document.getElementById('userText').value;
-    const x = parseFloat(document.getElementById('textX').value);
-    const y = parseFloat(document.getElementById('textY').value);
-    const rotation = parseFloat(document.getElementById('rotate').value);
-    const scale = parseFloat(document.getElementById('scale').value);
-    const skewX = parseFloat(document.getElementById('skewX').value);
-    const skewY = parseFloat(document.getElementById('skewY').value);
+    const img = images[imageChoiceSelect.value];
+    const t = img.textBlock.transform;
 
-    redrawCanvas(selectedImage, userText, x, y, rotation, scale, skewX, skewY);
+    t.position.x = parseFloat(textX.value);
+    t.position.y = parseFloat(textY.value);
+    t.scale = parseFloat(scale.value);
+    t.rotate = parseFloat(rotate.value);
+    t.skew.x = parseFloat(skewX.value);
+    t.skew.y = parseFloat(skewY.value);
+
+    renderImage(img, userText.value);
 }
 
-// Attach updateAll to all sliders and buttons
 ['userText','textX','textY','rotate','scale','skewX','skewY'].forEach(id => {
     document.getElementById(id).addEventListener('input', updateAll);
 });
 
-document.getElementById('imageChoice').addEventListener('click', function() {
-    loadFromConfig(true);
-    updateAll();
-});
-document.getElementById('imageChoice').addEventListener('change', function() {
-    /* required as mobile can miss the click */
-    loadFromConfig(true);
-    updateAll();
-});
-document.getElementById('loadExampleBtn').addEventListener('click', function() {
+imageChoiceSelect.addEventListener('change', () => {
     loadFromConfig(true);
     updateAll();
 });
 
-// Save the image with the overlay text
+//save button
 document.getElementById('saveBtn').onclick = () => {
-    // SheepCRM hated my images. Might have been the meta data on the PNG, not sure.
-    // Saving as jpeg might solve that?
-    const ctx = canvas.getContext("2d");
-
-    // Ensure a solid background (JPEG has no alpha)
     ctx.save();
-    ctx.globalCompositeOperation = "destination-over";
-    ctx.fillStyle = "#ffffff";
+    ctx.globalCompositeOperation = 'destination-over';
+    ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.restore();
 
-    // Explicit MIME type + quality
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
-
-    const link = document.createElement("a");
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+    const link = document.createElement('a');
     link.href = dataUrl;
-    link.download = "image_with_text.jpg";
+    link.download = 'image_with_text.jpg';
     link.click();
 };
 
-// Load the initial image
-document.getElementById('imageChoice').click();
+//initial load
+imageChoiceSelect.dispatchEvent(new Event('change'));
+
