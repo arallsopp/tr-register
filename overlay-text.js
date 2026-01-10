@@ -53,7 +53,7 @@ Promise.all([
     document.fonts.load('75px chalkboard'),
     document.fonts.load('75px harmattan')
 ]).then(() => {
-    document.getElementById('generateBtn').disabled = false;
+    //we are ready
 });
 
 function drawMultilineText(ctx, text, lineHeight) {
@@ -146,9 +146,6 @@ function updateAll() {
     document.getElementById(id).addEventListener('input', updateAll);
 });
 
-document.getElementById('generateBtn').addEventListener('click', function() {
-    updateAll();
-});
 document.getElementById('imageChoice').addEventListener('click', function() {
     loadFromConfig();
     updateAll();
