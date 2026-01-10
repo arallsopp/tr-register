@@ -150,7 +150,7 @@ document.getElementById('imageChoice').addEventListener('click', function() {
     loadFromConfig();
     updateAll();
 });
-document.getElementById('sampleBtn').addEventListener('click', function() {
+document.getElementById('loadExampleBtn').addEventListener('click', function() {
     loadFromConfig(true);
     updateAll();
 });
