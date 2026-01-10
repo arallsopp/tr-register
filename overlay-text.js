@@ -35,7 +35,7 @@ const images = {
         lineCount: 2,
         sampleText: "BRIAN & LINDA'S\n" +
             "DRIVE IT DAY, APR.  26",
-        colour: "rgba(255, 255, 255, 0.95)"
+        colour: "rgba(251,229,215,0.9)"
     },
     image4: {
         name: 'Monthly Meeting',
