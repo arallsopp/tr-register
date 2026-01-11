@@ -178,6 +178,36 @@ const images = {
                 }
             ]
         }
+    },
+    image7: {
+        meta: {
+            name: 'Dorset Postcard',
+            prompt: '2 lines',
+            src: 'assets/artwork/dorset-cliffs-pub-track.jpg'
+        },
+        textBlock: {
+            transform: {
+                position: { x: 716, y: 90 },
+                rotate: 0,
+                scale: 2.5,
+                skew: { x: 0, y: 0 }
+            },
+            defaultStyle: {
+                font: 'Damion',
+                size: 50,
+                color: 'rgb(28,41,25)',
+                align: 'center',
+                lineHeight: 43,
+                shadow: null
+            },
+            lines: [
+                { text: 'Thruxton Retro' },
+                {
+                    text: '3rd - 5th July 2026',
+                    transform: { scale: 0.7 }
+                }
+            ]
+        }
     }
 };
 
@@ -185,7 +215,8 @@ const images = {
 Promise.all([
     document.fonts.load('75px chalkboard'),
     document.fonts.load('75px harmattan'),
-    document.fonts.load('75px racing')
+    document.fonts.load('75px racing'),
+    document.fonts.load('75px Damion')
 ]);
 
 function resolveLinesWithInheritance(configLines, userText) {
