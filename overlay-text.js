@@ -287,6 +287,7 @@ function loadFromConfig(useSample = false) {
     if (useSample) {
         userText.value = img.textBlock.lines.map(l => l.text).join('\n');
     }
+    userText.style.textAlign = img.textBlock.defaultStyle.align;
 }
 
 function updateAll() {
