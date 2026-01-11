@@ -68,7 +68,7 @@ const images = {
             transform: {
                 position: { x: 609, y: 305 },
                 rotate: 0,
-                scale: 1.3,
+                scale: 1.2,
                 skew: { x: 0.01, y: 0.08 }
             },
             defaultStyle: {
