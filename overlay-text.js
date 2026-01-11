@@ -7,6 +7,7 @@ const images = {
     image1: {
         meta: {
             name: 'Pub Lunch Landscape',
+            prompt: '1 line',
             src: 'assets/artwork/pub-lunch-landscape-master.jpg'
         },
         textBlock: {
@@ -33,6 +34,7 @@ const images = {
     image2: {
         meta: {
             name: 'Pub Lunch Portrait',
+            prompt: 'up to 4 lines',
             src: 'assets/artwork/pub-lunch-portrait-master.jpg'
         },
         textBlock: {
@@ -62,6 +64,7 @@ const images = {
     image3: {
         meta: {
             name: 'Road Run',
+            prompt: '2 lines',
             src: 'assets/artwork/road-run.jpg'
         },
         textBlock: {
@@ -89,6 +92,7 @@ const images = {
     image4: {
         meta: {
             name: 'Monthly Meeting',
+            prompt: '1 line',
             src: 'assets/artwork/monthly-meeting.jpg'
         },
         textBlock: {
@@ -120,6 +124,7 @@ const images = {
     image5: {
         meta: {
             name: 'Generic Driving',
+            prompt: '2 lines',
             src: 'assets/artwork/corfe-drive.jpg'
         },
         textBlock: {
@@ -147,6 +152,7 @@ const images = {
     image6: {
         meta: {
             name: 'Racing',
+            prompt: '2 lines',
             src: 'assets/artwork/racing-tr3.jpg'
         },
         textBlock: {
@@ -288,6 +294,11 @@ function loadFromConfig(useSample = false) {
         userText.value = img.textBlock.lines.map(l => l.text).join('\n');
     }
     userText.style.textAlign = img.textBlock.defaultStyle.align;
+
+
+    document.getElementById('line-count-preference').textContent =
+        img.meta.prompt ? `(${img.meta.prompt})` : '';
+
 }
 
 function updateAll() {
