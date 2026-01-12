@@ -363,7 +363,6 @@ function renderImage(imageConfig, userText) {
         baseImage.onload = draw;
     }
 }
-
 const overlayCache = {};
 
 function drawOverlay(imageConfig) {
@@ -377,22 +376,31 @@ function drawOverlay(imageConfig) {
     }
 
     const img = overlayCache[overlay.src];
-    if (!img.complete) {
+
+    if (!img.complete || !img.naturalWidth) {
         img.onload = () => updateAll();
         return;
     }
 
-    const scale = overlay.scale || 1;
+    const scale = overlay.scale ?? 1;
+    const padding = overlay.padding ?? 0;
+
     const w = img.naturalWidth * scale;
     const h = img.naturalHeight * scale;
 
-    const x = canvas.width - w;
-    const y = canvas.height - h;
+    const x = canvas.width - w - padding;
+    const y = canvas.height - h - padding;
 
     ctx.save();
+
+    // 🔒 Ensure no inherited transforms affect placement
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
     ctx.drawImage(img, x, y, w, h);
+
     ctx.restore();
 }
+
 
 
 
