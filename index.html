@@ -51,6 +51,19 @@
                 <label for="imageChoice" class="form-label">Choose an Image:</label>
                 <select class="form-select" id="imageChoice"></select>
             </div>
+            <div id="imageUploadOptions" class="visually-hidden">
+                <div class="mb-2">
+                    <input
+                            type="file"
+                            id="imageUpload"
+                            accept="image/*"
+                    />
+                    <label>
+                        <input type="checkbox" id="overlayToggle" />
+                        Overlay signage
+                    </label>
+                </div>
+            </div>
             <div class="mb-2">
                 <label for="userText" class="form-label d-block">Text to Add:
                     <span id="line-count-preference" class="float-end"></span>

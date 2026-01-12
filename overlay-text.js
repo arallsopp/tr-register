@@ -208,6 +208,37 @@ const images = {
                 }
             ]
         }
+    },
+    upload: {
+        meta: {
+            name: 'Uploaded Image',
+            sourceType: 'upload'
+        },
+        overlay: {
+            enabled: false,
+            src: 'assets/overlays/redpost.png',
+            position: { x: 600, y: 600 },
+            scale: 1
+        },
+        textBlock: {
+            transform: {
+                position: { x: 200, y: 200 },
+                rotate: 0,
+                scale: 1,
+                skew: { x: 0, y: 0 }
+            },
+            defaultStyle: {
+                font: 'harmattan',
+                size: 50,
+                color: 'white',
+                align: 'left',
+                lineHeight: 50,
+                shadow: null
+            },
+            lines: [
+                { text: 'Your Text Here' }
+            ]
+        }
     }
 };
 
@@ -287,17 +318,57 @@ function renderTextBlock(ctx, block, userTextOverride) {
 
 
 function renderImage(imageConfig, userText) {
-    const img = new Image();
-    img.src = imageConfig.meta.src;
+    const baseImage = getBaseImage(imageConfig);
+    if (!baseImage) return;
 
-    img.onload = () => {
-        canvas.width = img.width;
-        canvas.height = img.height;
+    const draw = () => {
+        canvas.width = baseImage.naturalWidth;
+        canvas.height = baseImage.naturalHeight;
 
-        ctx.drawImage(img, 0, 0);
-        renderTextBlock(ctx, imageConfig.textBlock, userText);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // 1 Base image
+        ctx.drawImage(baseImage, 0, 0);
+
+        // 2 Overlay
+        if (imageConfig.overlay?.enabled) {
+            const overlayImg = new Image();
+            overlayImg.src = imageConfig.overlay.src;
+
+            const drawOverlayAndText = () => {
+                ctx.save();
+                ctx.translate(
+                    imageConfig.overlay.position.x,
+                    imageConfig.overlay.position.y
+                );
+                ctx.scale(imageConfig.overlay.scale, imageConfig.overlay.scale);
+                ctx.drawImage(overlayImg, 0, 0);
+                ctx.restore();
+
+                // 3 Text
+                renderTextBlock(ctx, imageConfig.textBlock, userText);
+            };
+
+            if (overlayImg.complete && overlayImg.naturalWidth !== 0) {
+                drawOverlayAndText();
+            } else {
+                overlayImg.onload = drawOverlayAndText;
+            }
+        } else {
+            // 3 Text only
+            renderTextBlock(ctx, imageConfig.textBlock, userText);
+        }
     };
+
+    if (baseImage.complete && baseImage.naturalWidth !== 0) {
+        draw();
+    } else {
+        baseImage.onload = draw;
+    }
 }
+
+
+
 
 
 // UI Wiring
@@ -346,11 +417,52 @@ function updateAll() {
     renderImage(img, userText.value);
 }
 
+function loadImageFromSource(imageConfig, uploadedImageUrl) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+
+        if (imageConfig.meta.sourceType === 'upload') {
+            if (!uploadedImageUrl) return;
+            img.src = uploadedImageUrl;
+        } else {
+            img.src = imageConfig.meta.src;
+        }
+    });
+}
+
+// support for external images
+function loadImage(src) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous'; // REQUIRED for URL images + saving
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+    });
+}
+
+function getBaseImage(imageConfig) {
+    if (imageConfig.meta.sourceType === 'upload') {
+        return uploadedImage;
+    }
+
+    const img = new Image();
+    img.src = imageConfig.meta.src;
+    return img;
+}
+
+/* handle events */
 ['userText','textX','textY','rotate','scale','skewX','skewY'].forEach(id => {
     document.getElementById(id).addEventListener('input', updateAll);
 });
 
 imageChoiceSelect.addEventListener('change', () => {
+    document.getElementById("imageUploadOptions").classList
+        .toggle('visually-hidden', images[imageChoiceSelect.value].meta.sourceType !== 'upload');
+
     loadFromConfig(true);
     updateAll();
 });
@@ -370,6 +482,33 @@ document.getElementById('saveBtn').onclick = () => {
     link.click();
 };
 
-//initial load
+//upload image
+let uploadedImage = null;
+const uploadInput = document.getElementById('imageUpload');
+
+uploadInput.addEventListener('change', () => {
+    const file = uploadInput.files[0];
+    if (!file) return;
+
+    const img = new Image();
+
+    img.onload = () => {
+        uploadedImage = img;
+        updateAll();
+    };
+
+    img.src = URL.createObjectURL(file);
+});
+
+const overlayToggle = document.getElementById('overlayToggle');
+overlayToggle.addEventListener('change', () => {
+    const img = images[imageChoiceSelect.value];
+    if (img.overlay) {
+        img.overlay.enabled = overlayToggle.checked;
+        updateAll();
+    }
+});
+
+//handle initial load
 imageChoiceSelect.dispatchEvent(new Event('change'));
 
