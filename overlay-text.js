@@ -496,15 +496,15 @@ function loadFromConfig(useSample = false) {
     rotate.value = t.rotate || 0;
     skewX.value = t.skew?.x || 0;
     skewY.value = t.skew?.y || 0;
-
+    overlayToggle.checked = img.overlay?.enabled || 0
     if (useSample) {
         userText.value = img.textBlock.lines.map(l => l.text).join('\n');
     }
     userText.style.textAlign = img.textBlock.defaultStyle.align;
 
-
     document.getElementById('line-count-preference').textContent =
         img.meta.prompt ? `(${img.meta.prompt})` : '';
+
 
 }
 
