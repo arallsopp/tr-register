@@ -1,6 +1,8 @@
 // Get the canvas element and its context
 const canvas = document.getElementById('myCanvas');
 const ctx = canvas.getContext('2d');
+const OUTPUT_WIDTH = 1360;
+const OUTPUT_HEIGHT = 765;
 
 // Image options (refactored)
 const images = {
@@ -263,6 +265,12 @@ function resolveLinesWithInheritance(configLines, userText) {
 
         return {
             ...baseLine,
+            transform: baseLine.transform
+                ? { ...baseLine.transform }
+                : undefined,
+            style: baseLine.style
+                ? { ...baseLine.style }
+                : undefined,
             text
         };
     });
@@ -322,50 +330,71 @@ function renderImage(imageConfig, userText) {
     if (!baseImage) return;
 
     const draw = () => {
-        canvas.width = baseImage.naturalWidth;
-        canvas.height = baseImage.naturalHeight;
-
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // 1 Base image
-        ctx.drawImage(baseImage, 0, 0);
-
-        // 2 Overlay
-        if (imageConfig.overlay?.enabled) {
-            const overlayImg = new Image();
-            overlayImg.src = imageConfig.overlay.src;
-
-            const drawOverlayAndText = () => {
-                ctx.save();
-                ctx.translate(
-                    imageConfig.overlay.position.x,
-                    imageConfig.overlay.position.y
-                );
-                ctx.scale(imageConfig.overlay.scale, imageConfig.overlay.scale);
-                ctx.drawImage(overlayImg, 0, 0);
-                ctx.restore();
-
-                // 3 Text
-                renderTextBlock(ctx, imageConfig.textBlock, userText);
-            };
-
-            if (overlayImg.complete && overlayImg.naturalWidth !== 0) {
-                drawOverlayAndText();
-            } else {
-                overlayImg.onload = drawOverlayAndText;
-            }
+        if (imageConfig.meta.sourceType === 'upload') {
+            drawUploadedImageCrop(
+                ctx,
+                baseImage,
+                OUTPUT_WIDTH,
+                OUTPUT_HEIGHT,
+                uploadCrop
+            );
         } else {
-            // 3 Text only
-            renderTextBlock(ctx, imageConfig.textBlock, userText);
+            // Presets: unchanged behavior
+            canvas.width = baseImage.naturalWidth;
+            canvas.height = baseImage.naturalHeight;
+            ctx.drawImage(baseImage, 0, 0);
         }
+
+        // 2 Overlay (unchanged)
+        if (imageConfig.overlay?.enabled) {
+            drawOverlay(imageConfig);
+        }
+
+        // 3 Text
+        renderTextBlock(ctx, imageConfig.textBlock, userText);
     };
 
-    if (baseImage.complete && baseImage.naturalWidth !== 0) {
+    if (baseImage.complete && baseImage.naturalWidth) {
         draw();
     } else {
         baseImage.onload = draw;
     }
 }
+
+const overlayCache = {};
+
+function drawOverlay(imageConfig) {
+    const overlay = imageConfig.overlay;
+    if (!overlay?.enabled || !overlay.src) return;
+
+    if (!overlayCache[overlay.src]) {
+        const img = new Image();
+        img.src = overlay.src;
+        overlayCache[overlay.src] = img;
+    }
+
+    const img = overlayCache[overlay.src];
+    if (!img.complete) {
+        img.onload = () => updateAll();
+        return;
+    }
+
+    const scale = overlay.scale || 1;
+    const w = img.naturalWidth * scale;
+    const h = img.naturalHeight * scale;
+
+    const x = canvas.width - w;
+    const y = canvas.height - h;
+
+    ctx.save();
+    ctx.drawImage(img, x, y, w, h);
+    ctx.restore();
+}
+
+
 
 
 
@@ -415,6 +444,45 @@ function updateAll() {
     t.skew.y = parseFloat(skewY.value);
 
     renderImage(img, userText.value);
+}
+
+const uploadCrop = {
+    offsetX: 0.5, // 0 = left, 0.5 = center, 1 = right
+    offsetY: 0.5  // 0 = top,  0.5 = center, 1 = bottom
+}
+
+function drawUploadedImageCrop(ctx, img, cw, ch, crop) {
+    const imgW = img.naturalWidth;
+    const imgH = img.naturalHeight;
+
+    const canvasAspect = cw / ch;
+    const imgAspect = imgW / imgH;
+
+    let cropW, cropH;
+
+    if (imgAspect > canvasAspect) {
+        // Image wider than 16:9 → crop width
+        cropH = imgH;
+        cropW = cropH * canvasAspect;
+    } else {
+        // Image taller than 16:9 → crop height
+        cropW = imgW;
+        cropH = cropW / canvasAspect;
+    }
+
+    // Max movement range
+    const maxX = imgW - cropW;
+    const maxY = imgH - cropH;
+
+    // Apply normalized offsets
+    const sx = maxX * crop.offsetX;
+    const sy = maxY * crop.offsetY;
+
+    ctx.drawImage(
+        img,
+        sx, sy, cropW, cropH, // source crop
+        0, 0, cw, ch          // destination
+    );
 }
 
 
@@ -488,6 +556,16 @@ overlayToggle.addEventListener('change', () => {
         img.overlay.enabled = overlayToggle.checked;
         updateAll();
     }
+});
+
+cropX.addEventListener('input', () => {
+    uploadCrop.offsetX = parseFloat(cropX.value);
+    updateAll();
+});
+
+cropY.addEventListener('input', () => {
+    uploadCrop.offsetY = parseFloat(cropY.value);
+    updateAll();
 });
 
 //handle initial load
