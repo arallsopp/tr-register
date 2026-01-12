@@ -351,9 +351,43 @@ function renderImage(imageConfig, userText) {
             ctx.drawImage(baseImage, 0, 0);
         }
 
-        // Add the overlay
+        // Add the overlay and movable position
         if (imageConfig.overlay?.enabled) {
-            drawOverlay(imageConfig);
+            const overlay = imageConfig.overlay;
+            const scale = imageConfig.textBlock.transform.scale || 1;
+
+            const img = overlayCache[overlay.src];
+            if (!img) return;
+
+            const w = img.naturalWidth * scale;
+            const h = img.naturalHeight * scale;
+
+            const x = (overlay.posX ?? canvas.width - w) ;
+            const y = (overlay.posY ?? canvas.height - h) ;
+
+            ctx.save();
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.drawImage(img, x, y, w, h);
+            ctx.restore();
+
+            // Draw text relative to overlay
+            const textBlock = imageConfig.textBlock;
+            const textOffset = overlay.textOffset || { x: 0, y: 0 };
+
+            const textTransform = {
+                ...textBlock.transform,
+                position: {
+                    x: x + textOffset.x * scale,
+                    y: y + textOffset.y * scale
+                },
+                scale: scale // same as overlay
+            };
+
+            renderTextBlock(ctx, { ...textBlock, transform: textTransform }, userText);
+
+        }else{
+            // Overlay disabled → render text normally
+            renderTextBlock(ctx, imageConfig.textBlock, userText);
         }
 
         // Apply the text
@@ -517,10 +551,40 @@ function getBaseImage(imageConfig) {
 }
 
 /* handle events */
-['userText','textX','textY','rotate','scale','skewX','skewY'].forEach(id => {
+['userText','rotate','skewX','skewY'].forEach(id => {
     document.getElementById(id).addEventListener('input', updateAll);
 });
 
+const textX = document.getElementById('textX'),
+    textY = document.getElementById('textY'),
+    scale= document.getElementById('scale');
+textX.addEventListener('input', () => {
+    const img = images[imageChoiceSelect.value];
+    if (img.overlay?.enabled) {
+        img.overlay.posX = parseFloat(textX.value);
+    } else {
+        img.textBlock.transform.position.x = parseFloat(textX.value);
+    }
+    updateAll();
+});
+
+textY.addEventListener('input', () => {
+    const img = images[imageChoiceSelect.value];
+    if (img.overlay?.enabled) {
+        img.overlay.posY = parseFloat(textY.value);
+    } else {
+        img.textBlock.transform.position.y = parseFloat(textY.value);
+    }
+    updateAll();
+});
+
+let sca
+scale.addEventListener('input', () => {
+    const img = images[imageChoiceSelect.value];
+    const val = parseFloat(scale.value);
+    img.textBlock.transform.scale = val;
+    updateAll();
+});
 imageChoiceSelect.addEventListener('change', () => {
     document.getElementById("imageUploadOptions").classList
         .toggle('visually-hidden', images[imageChoiceSelect.value].meta.sourceType !== 'upload');
@@ -580,6 +644,8 @@ cropY.addEventListener('input', () => {
     uploadCrop.offsetY = parseFloat(cropY.value);
     updateAll();
 });
+
+
 
 //handle initial load
 imageChoiceSelect.dispatchEvent(new Event('change'));
