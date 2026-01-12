@@ -62,77 +62,79 @@
                     />
                 </div>
                 <div class="form-check mb-2">
-                    <input class="form-check-input" type="checkbox" value="" id="overlayToggle">
-                    <label class="form-check-label" for="overlayToggle">
-                        Overlay Sign Post
-                    </label>
+                    <input class="form-check-input" type="checkbox" value="" id="overlayToggle"> <label
+                        class="form-check-label" for="overlayToggle"> Overlay Sign Post </label>
                 </div>
                 <div class="row mb-2">
                     <div class="col">
-                        <label for="cropX" class="form-label">Crop X</label>
-                        <input class="form-range" type="range" id="cropX"
-                               min="0" max="1" step="0.001" value="0.5">
+                        <label for="cropX" class="form-label">Crop X</label> <input class="form-range" type="range"
+                                                                                    id="cropX"
+                                                                                    min="0" max="1" step="0.001"
+                                                                                    value="0.5">
                     </div>
                     <div class="col">
-                        <label for="cropY" class="form-label">Crop Y</label>
-                        <input class="form-range" type="range" id="cropY"
-                               min="0" max="1" step="0.001" value="0.5">
+                        <label for="cropY" class="form-label">Crop Y</label> <input class="form-range" type="range"
+                                                                                    id="cropY"
+                                                                                    min="0" max="1" step="0.001"
+                                                                                    value="0.5">
                     </div>
                 </div>
             </div>
-            <div class="mb-2">
-                <label for="userText" class="form-label d-block">Text to Add: <span id="line-count-preference"
-                                                                                    class="float-end"></span> </label>
-                <textarea class="form-control" id="userText" rows="4">Your text here</textarea>
-            </div>
-            <div class="accordion" id="accordionExample">
+            <div class="accordion" id="accordionControls">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingImageText">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseImageText" aria-expanded="true"
+                                aria-controls="collapseImageText">Image Text
+                        </button>
+                    </h2>
+                    <div id="collapseImageText" class="accordion-collapse show"
+                         aria-labelledby="headingImageText" data-bs-parent="#accordionControls">
+                        <div class="accordion-body">
+                            <div class="mb-2">
+                                <label for="userText" class="form-label d-block">Text to Add: <span
+                                        id="line-count-preference"
+                                        class="float-end"></span> </label>
+                                <textarea class="form-control" id="userText" rows="4">Your text here</textarea>
+                            </div>
+                            <div class="row mb-2">
+                                <!-- Controls for adjusting the X and Y position -->
+                                <div class="col">
+                                    <label for="textX" class="form-label">Position X</label>
+                                    <input type="number" id="textX" class="form-control" min="-1500" max="1500"
+                                           step="1" value="450"/>
+                                </div>
+                                <div class="col">
+                                    <label for="textY" class="form-label">Position Y</label>
+                                    <input type="number" id="textY" class="form-control" min="-1500" max="1500"
+                                           step="1" value="850"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="headingOne">
                         <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                            Advanced Options
+                            Advanced Text Options
                         </button>
                     </h2>
                     <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
-                         data-bs-parent="#accordionExample">
+                         data-bs-parent="#accordionControls">
                         <div class="accordion-body">
-
-                            <div class="row mb-2">
-                                <!-- Controls for adjusting the X and Y position -->
-                                <div class="col">
-                                    <label for="textX" class="form-label">Position X</label> <input type="number"
-                                                                                                    id="textX"
-                                                                                                    class="form-control"
-                                                                                                    min="-1500"
-                                                                                                    max="1500" step="1"
-                                                                                                    value="450"/>
-                                </div>
-                                <div class="col">
-                                    <label for="textY" class="form-label">Position Y</label> <input type="number"
-                                                                                                    id="textY"
-                                                                                                    class="form-control"
-                                                                                                    min="-1500"
-                                                                                                    max="1500" step="1"
-                                                                                                    value="850"/>
-                                </div>
-                            </div>
 
                             <div class="row mb-2">
                                 <!-- controls for adjusting the rotation and scale -->
                                 <div class="col">
-                                    <label for="rotate" class="form-label">Rotation</label> <input type="number"
-                                                                                                   id="rotate"
-                                                                                                   class="form-control"
-                                                                                                   min="-359" max="359"
-                                                                                                   step="0.5"
-                                                                                                   value="0"/>
+                                    <label for="rotate" class="form-label">Rotation</label>
+                                    <input type="number" id="rotate" class="form-control"  min="-359" max="359"
+                                           step="0.5" value="0"/>
                                 </div>
                                 <div class="col">
-                                    <label for="scale" class="form-label">Scale</label> <input type="number" id="scale"
-                                                                                               class="form-control"
-                                                                                               min="0.1" max="3"
-                                                                                               step="0.1"
-                                                                                               value="1"/>
+                                    <label for="scale" class="form-label">Scale</label>
+                                    <input type="number" id="scale" class="form-control" min="0.1" max="3"
+                                           step="0.1" value="1"/>
                                 </div>
                             </div>
                             <div class="row mb-2">
@@ -142,11 +144,9 @@
                                         value="0"/>
                                 </div>
                                 <div class="col">
-                                    <label for="skewY" class="form-label">Skew Y</label> <input type="number" id="skewY"
-                                                                                                class="form-control"
-                                                                                                min="-1" max="1"
-                                                                                                step="0.01"
-                                                                                                value="0"/>
+                                    <label for="skewY" class="form-label">Skew Y</label>
+                                    <input type="number" id="skewY" class="form-control" min="-1" max="1"
+                                           step="0.01" value="0"/>
                                 </div>
                             </div>
                         </div>
