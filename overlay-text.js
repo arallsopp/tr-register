@@ -332,28 +332,36 @@ function renderImage(imageConfig, userText) {
     const draw = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // 1 Base image
+        // ----------------------
+        // 1️⃣ Set canvas size first
+        // ----------------------
         if (imageConfig.meta.sourceType === 'upload') {
+            canvas.width = OUTPUT_WIDTH;
+            canvas.height = OUTPUT_HEIGHT;
+
             drawUploadedImageCrop(
                 ctx,
                 baseImage,
-                OUTPUT_WIDTH,
-                OUTPUT_HEIGHT,
+                canvas.width,
+                canvas.height,
                 uploadCrop
             );
         } else {
-            // Presets: unchanged behavior
             canvas.width = baseImage.naturalWidth;
             canvas.height = baseImage.naturalHeight;
             ctx.drawImage(baseImage, 0, 0);
         }
 
-        // 2 Overlay (unchanged)
+        // ----------------------
+        // 2️⃣ Overlay
+        // ----------------------
         if (imageConfig.overlay?.enabled) {
             drawOverlay(imageConfig);
         }
 
-        // 3 Text
+        // ----------------------
+        // 3️⃣ Text
+        // ----------------------
         renderTextBlock(ctx, imageConfig.textBlock, userText);
     };
 
@@ -363,6 +371,7 @@ function renderImage(imageConfig, userText) {
         baseImage.onload = draw;
     }
 }
+
 const overlayCache = {};
 
 function drawOverlay(imageConfig) {
@@ -376,13 +385,13 @@ function drawOverlay(imageConfig) {
     }
 
     const img = overlayCache[overlay.src];
-
     if (!img.complete || !img.naturalWidth) {
         img.onload = () => updateAll();
         return;
     }
 
-    const scale = overlay.scale ?? 1;
+    // 🔑 Use the SAME scale as the text block
+    const scale = imageConfig.textBlock.transform.scale || 1;
     const padding = overlay.padding ?? 0;
 
     const w = img.naturalWidth * scale;
@@ -393,13 +402,14 @@ function drawOverlay(imageConfig) {
 
     ctx.save();
 
-    // 🔒 Ensure no inherited transforms affect placement
+    // 🔒 Reset all transforms so anchoring is absolute
     ctx.setTransform(1, 0, 0, 1, 0, 0);
 
     ctx.drawImage(img, x, y, w, h);
 
     ctx.restore();
 }
+
 
 
 
