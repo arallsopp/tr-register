@@ -79,10 +79,14 @@ const images = {
             defaultStyle: {
                 font: 'harmattan',
                 size: 50,
-                color: 'rgba(251,229,215,0.9)',
+                color: 'rgb(243,222,194)',
                 align: 'left',
                 lineHeight: 43,
-                shadow: null
+                shadow: {
+                    shadowColor: 'rgba(0,0,0,0.8)',
+                    shadowBlur: 1,
+                    shadowOffsetX: 1,
+                    shadowOffsetY: 1}
             },
             lines: [
                 { text: "BRIAN AND LINDA'S" },
@@ -283,6 +287,7 @@ function resolveLinesWithInheritance(configLines, userText) {
 }
 function renderTextBlock(ctx, block, userTextOverride) {
     const { transform, defaultStyle, lines } = block;
+    const blockScale = transform.scale || 1;
 
     ctx.save();
 
@@ -312,7 +317,10 @@ function renderTextBlock(ctx, block, userTextOverride) {
         ctx.fillStyle = style.color;
 
         if (style.shadow) {
-            Object.assign(ctx, style.shadow);
+            ctx.shadowColor = style.shadow.shadowColor;
+            ctx.shadowOffsetX = (style.shadow.shadowOffsetX || 0) * blockScale;
+            ctx.shadowOffsetY = (style.shadow.shadowOffsetY || 0) * blockScale;
+            ctx.shadowBlur     = (style.shadow.shadowBlur || 0) * blockScale;
         } else {
             ctx.shadowColor = 'transparent';
         }
