@@ -217,10 +217,11 @@ const images = {
             sourceType: 'upload'
         },
         overlay: {
-            enabled: false,
+            enabled: true,
             src: 'assets/overlays/redpost.png',
-            position: { x: 600, y: 600 },
-            scale: 1
+            scale: 1,
+            padding: 0,           // only used if you want a margin from bottom-right
+            textOffset: { x: 0, y: 0 } // position of text relative to overlay's top-left
         },
         textBlock: {
             transform: {
@@ -332,9 +333,7 @@ function renderImage(imageConfig, userText) {
     const draw = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // ----------------------
-        // 1️⃣ Set canvas size first
-        // ----------------------
+        // Set canvas size first
         if (imageConfig.meta.sourceType === 'upload') {
             canvas.width = OUTPUT_WIDTH;
             canvas.height = OUTPUT_HEIGHT;
@@ -352,16 +351,12 @@ function renderImage(imageConfig, userText) {
             ctx.drawImage(baseImage, 0, 0);
         }
 
-        // ----------------------
-        // 2️⃣ Overlay
-        // ----------------------
+        // Add the overlay
         if (imageConfig.overlay?.enabled) {
             drawOverlay(imageConfig);
         }
 
-        // ----------------------
-        // 3️⃣ Text
-        // ----------------------
+        // Apply the text
         renderTextBlock(ctx, imageConfig.textBlock, userText);
     };
 
