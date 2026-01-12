@@ -417,41 +417,22 @@ function updateAll() {
     renderImage(img, userText.value);
 }
 
-function loadImageFromSource(imageConfig, uploadedImageUrl) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
 
-        img.onload = () => resolve(img);
-        img.onerror = reject;
+const imageCache = {};
 
-        if (imageConfig.meta.sourceType === 'upload') {
-            if (!uploadedImageUrl) return;
-            img.src = uploadedImageUrl;
-        } else {
-            img.src = imageConfig.meta.src;
-        }
-    });
-}
-
-// support for external images
-function loadImage(src) {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous'; // REQUIRED for URL images + saving
-        img.onload = () => resolve(img);
-        img.onerror = reject;
-        img.src = src;
-    });
-}
-
+//use imageCache to avoid reloading all the time.
 function getBaseImage(imageConfig) {
     if (imageConfig.meta.sourceType === 'upload') {
         return uploadedImage;
     }
 
-    const img = new Image();
-    img.src = imageConfig.meta.src;
-    return img;
+    if (!imageCache[imageConfig.meta.src]) {
+        const img = new Image();
+        img.src = imageConfig.meta.src;
+        imageCache[imageConfig.meta.src] = img;
+    }
+
+    return imageCache[imageConfig.meta.src];
 }
 
 /* handle events */
