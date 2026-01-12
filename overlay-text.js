@@ -220,8 +220,8 @@ const images = {
             enabled: true,
             src: 'assets/overlays/redpost.png',
             scale: 1,
-            padding: 0,           // only used if you want a margin from bottom-right
-            textOffset: { x: 0, y: 0 } // position of text relative to overlay's top-left
+            padding: 10,           // only used if you want a margin from bottom-right
+            textOffset: { x: 80, y: 380 } // position of text relative to overlay's top-left
         },
         textBlock: {
             transform: {
@@ -232,14 +232,19 @@ const images = {
             },
             defaultStyle: {
                 font: 'harmattan',
-                size: 50,
-                color: 'white',
+                size: 65,
+                color: '#faf0d7',
                 align: 'left',
-                lineHeight: 50,
-                shadow: null
+                lineHeight: 65,
+                shadow: {
+                    shadowColor: 'rgba(0,0,0,1)',
+                    shadowBlur: 3,
+                    shadowOffsetX: 2,
+                    shadowOffsetY: 2
+                }
             },
             lines: [
-                { text: 'Your Text Here' }
+                { text: 'Your Text Here\nLine 2' }
             ]
         }
     }
@@ -294,15 +299,14 @@ function renderTextBlock(ctx, block, userTextOverride) {
 
     const activeLines = resolveLinesWithInheritance(lines, userTextOverride);
 
-    activeLines.forEach((line, index) => {
+    let y = 0;
+
+    activeLines.forEach(line => {
         const style = { ...defaultStyle, ...line.style };
-        const lineTransform = line.transform || {};
+        const scale = line.transform?.scale ?? 1;
 
         ctx.save();
-
-        if (lineTransform.scale) {
-            ctx.scale(lineTransform.scale, lineTransform.scale);
-        }
+        ctx.scale(scale, scale);
 
         ctx.font = `${style.size}px ${style.font}`;
         ctx.fillStyle = style.color;
@@ -313,13 +317,10 @@ function renderTextBlock(ctx, block, userTextOverride) {
             ctx.shadowColor = 'transparent';
         }
 
-        ctx.fillText(
-            line.text,
-            0,
-            index * style.lineHeight
-        );
-
+        ctx.fillText(line.text, 0, y / scale);
         ctx.restore();
+
+        y += style.lineHeight * scale;
     });
 
     ctx.restore();
@@ -333,7 +334,9 @@ function renderImage(imageConfig, userText) {
     const draw = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Set canvas size first
+        // -------------------------
+        // 1️⃣ Base image
+        // -------------------------
         if (imageConfig.meta.sourceType === 'upload') {
             canvas.width = OUTPUT_WIDTH;
             canvas.height = OUTPUT_HEIGHT;
@@ -351,47 +354,62 @@ function renderImage(imageConfig, userText) {
             ctx.drawImage(baseImage, 0, 0);
         }
 
-        // Add the overlay and movable position
+        // -------------------------
+        // 2️⃣ Overlay + bound text
+        // -------------------------
         if (imageConfig.overlay?.enabled) {
             const overlay = imageConfig.overlay;
+
+            if (!overlayCache[overlay.src]) {
+                const img = new Image();
+                img.src = overlay.src;
+                overlayCache[overlay.src] = img;
+            }
+
+            const overlayImg = overlayCache[overlay.src];
+            if (!overlayImg.complete || !overlayImg.naturalWidth) {
+                overlayImg.onload = () => updateAll();
+                return;
+            }
+
             const scale = imageConfig.textBlock.transform.scale || 1;
 
-            const img = overlayCache[overlay.src];
-            if (!img) return;
+            const w = overlayImg.naturalWidth * scale;
+            const h = overlayImg.naturalHeight * scale;
 
-            const w = img.naturalWidth * scale;
-            const h = img.naturalHeight * scale;
+            // 🔑 Position X/Y now control the entire composite
+            const x = overlay.posX ?? (canvas.width - w);
+            const y = overlay.posY ?? (canvas.height - h);
 
-            const x = (overlay.posX ?? canvas.width - w) ;
-            const y = (overlay.posY ?? canvas.height - h) ;
-
+            // ---- draw overlay ----
             ctx.save();
             ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.drawImage(img, x, y, w, h);
+            ctx.drawImage(overlayImg, x, y, w, h);
             ctx.restore();
 
-            // Draw text relative to overlay
-            const textBlock = imageConfig.textBlock;
+            // ---- draw text relative to overlay ----
             const textOffset = overlay.textOffset || { x: 0, y: 0 };
 
-            const textTransform = {
-                ...textBlock.transform,
-                position: {
-                    x: x + textOffset.x * scale,
-                    y: y + textOffset.y * scale
-                },
-                scale: scale // same as overlay
-            };
+            const textBlock = imageConfig.textBlock;
 
-            renderTextBlock(ctx, { ...textBlock, transform: textTransform }, userText);
+            renderTextBlock(ctx, {
+                ...textBlock,
+                transform: {
+                    ...textBlock.transform,
+                    position: {
+                        x: x + textOffset.x * scale,
+                        y: y + textOffset.y * scale
+                    },
+                    scale
+                }
+            }, userText);
 
-        }else{
-            // Overlay disabled → render text normally
+        } else {
+            // -------------------------
+            // 3️⃣ Text only (no overlay)
+            // -------------------------
             renderTextBlock(ctx, imageConfig.textBlock, userText);
         }
-
-        // Apply the text
-        renderTextBlock(ctx, imageConfig.textBlock, userText);
     };
 
     if (baseImage.complete && baseImage.naturalWidth) {
@@ -400,6 +418,7 @@ function renderImage(imageConfig, userText) {
         baseImage.onload = draw;
     }
 }
+
 
 const overlayCache = {};
 
@@ -508,29 +527,22 @@ function drawUploadedImageCrop(ctx, img, cw, ch, crop) {
     let cropW, cropH;
 
     if (imgAspect > canvasAspect) {
-        // Image wider than 16:9 → crop width
         cropH = imgH;
         cropW = cropH * canvasAspect;
     } else {
-        // Image taller than 16:9 → crop height
         cropW = imgW;
         cropH = cropW / canvasAspect;
     }
 
-    // Max movement range
     const maxX = imgW - cropW;
     const maxY = imgH - cropH;
 
-    // Apply normalized offsets
     const sx = maxX * crop.offsetX;
     const sy = maxY * crop.offsetY;
 
-    ctx.drawImage(
-        img,
-        sx, sy, cropW, cropH, // source crop
-        0, 0, cw, ch          // destination
-    );
+    ctx.drawImage(img, sx, sy, cropW, cropH, 0, 0, cw, ch);
 }
+
 
 
 const imageCache = {};
@@ -581,8 +593,7 @@ textY.addEventListener('input', () => {
 let sca
 scale.addEventListener('input', () => {
     const img = images[imageChoiceSelect.value];
-    const val = parseFloat(scale.value);
-    img.textBlock.transform.scale = val;
+    img.textBlock.transform.scale = parseFloat(scale.value);
     updateAll();
 });
 imageChoiceSelect.addEventListener('change', () => {
