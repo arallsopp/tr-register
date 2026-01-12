@@ -219,15 +219,15 @@ const images = {
         overlay: {
             enabled: true,
             src: 'assets/overlays/redpost.png',
-            scale: 1,
-            padding: 10,           // only used if you want a margin from bottom-right
+            scale: 0.4,
+            offset: {x:30, y:0}, // pixels from bottom right
             textOffset: { x: 80, y: 380 } // position of text relative to overlay's top-left
         },
         textBlock: {
             transform: {
-                position: { x: 200, y: 200 },
+                position: { x: 0, y: 0 }, //not really text, just that overlay uses this.
                 rotate: 0,
-                scale: 1,
+                scale: 0.4,
                 skew: { x: 0, y: 0 }
             },
             defaultStyle: {
@@ -335,7 +335,7 @@ function renderImage(imageConfig, userText) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         // -------------------------
-        // 1️⃣ Base image
+        // 1 Base image
         // -------------------------
         if (imageConfig.meta.sourceType === 'upload') {
             canvas.width = OUTPUT_WIDTH;
@@ -355,7 +355,7 @@ function renderImage(imageConfig, userText) {
         }
 
         // -------------------------
-        // 2️⃣ Overlay + bound text
+        // 2 Overlay + bound text
         // -------------------------
         if (imageConfig.overlay?.enabled) {
             const overlay = imageConfig.overlay;
@@ -372,16 +372,18 @@ function renderImage(imageConfig, userText) {
                 return;
             }
 
+            // ---- draw overlay ----
             const scale = imageConfig.textBlock.transform.scale || 1;
 
             const w = overlayImg.naturalWidth * scale;
             const h = overlayImg.naturalHeight * scale;
 
-            // 🔑 Position X/Y now control the entire composite
-            const x = overlay.posX ?? (canvas.width - w);
-            const y = overlay.posY ?? (canvas.height - h);
+            // 🔑 Bottom-right–relative positioning
+            const offset = overlay.offset || { x: 0, y: 0 };
 
-            // ---- draw overlay ----
+            const x = canvas.width - w - offset.x;
+            const y = canvas.height - h - offset.y;
+
             ctx.save();
             ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.drawImage(overlayImg, x, y, w, h);
@@ -406,7 +408,7 @@ function renderImage(imageConfig, userText) {
 
         } else {
             // -------------------------
-            // 3️⃣ Text only (no overlay)
+            // 3 Text only (no overlay)
             // -------------------------
             renderTextBlock(ctx, imageConfig.textBlock, userText);
         }
@@ -572,25 +574,30 @@ const textX = document.getElementById('textX'),
     scale= document.getElementById('scale');
 textX.addEventListener('input', () => {
     const img = images[imageChoiceSelect.value];
+    const val = parseFloat(textX.value);
+
     if (img.overlay?.enabled) {
-        img.overlay.posX = parseFloat(textX.value);
+        img.overlay.offset.x = val;
     } else {
-        img.textBlock.transform.position.x = parseFloat(textX.value);
+        img.textBlock.transform.position.x = val;
     }
+
     updateAll();
 });
 
 textY.addEventListener('input', () => {
     const img = images[imageChoiceSelect.value];
+    const val = parseFloat(textY.value);
+
     if (img.overlay?.enabled) {
-        img.overlay.posY = parseFloat(textY.value);
+        img.overlay.offset.y = val;
     } else {
-        img.textBlock.transform.position.y = parseFloat(textY.value);
+        img.textBlock.transform.position.y = val;
     }
+
     updateAll();
 });
 
-let sca
 scale.addEventListener('input', () => {
     const img = images[imageChoiceSelect.value];
     img.textBlock.transform.scale = parseFloat(scale.value);
