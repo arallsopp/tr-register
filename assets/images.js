@@ -8,7 +8,7 @@ const images = {
         },
         textBlock: {
             transform: {
-                position: { x: 450, y: 850 },
+                position: { x: 82, y: 850 },
                 rotate: 0,
                 scale: 1,
                 skew: { x: 0, y: 0 }
@@ -22,7 +22,7 @@ const images = {
                 shadow: null
             },
             lines: [
-                { text: 'Steve and SaNdra' }
+                { text: '22/02 - BOTANY BAY INNE    12:30' }
             ]
         }
     },
@@ -30,12 +30,12 @@ const images = {
     image2: {
         meta: {
             name: 'Pub Lunch Portrait',
-            prompt: 'up to 4 lines',
+            prompt: 'up to 5 lines',
             src: 'assets/artwork/pub-lunch-portrait-master.jpg'
         },
         textBlock: {
             transform: {
-                position: { x: 85, y: 1160 },
+                position: { x: 85, y: 1100 },
                 rotate: 0,
                 scale: 1,
                 skew: { x: 0, y: 0 }
@@ -49,8 +49,10 @@ const images = {
                 shadow: null
             },
             lines: [
-                { text: 'Steve and SaNdra' },
-                { text: '22ND FEBRUARY \'26\n\n' +
+                { text: 'STEVE and SANDRA\'S' },
+                { text: 'FEBRUARY PUB LUNCH\n' +
+                        '\n' +
+                        '12:30 ON THE 22ND \n' +
                         'The "BOTANY BAY INNE", DT11 9ET',
                     transform: { scale: 0.8 }}
             ]
