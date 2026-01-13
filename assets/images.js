@@ -3,7 +3,7 @@ const images = {
     image1: {
         meta: {
             name: 'Pub Lunch Landscape',
-            prompt: '1 line',
+            prompt: '2 lines',
             src: 'assets/artwork/pub-lunch-landscape-master.jpg'
         },
         textBlock: {
@@ -18,11 +18,14 @@ const images = {
                 size: 75,
                 color: 'rgba(255,255,255,0.8)',
                 align: 'left',
-                lineHeight: 90,
+                lineHeight: 101,
                 shadow: null
             },
             lines: [
-                { text: '22/02 - BOTANY BAY INNE    12:30' }
+                { text: '22/02 - BOTANY BAY INNE    12:30' },
+                { text: 'ORGANISED BY SANDRA AND STEVE                  DT11 9ET',
+                    transform: { scale: 0.6 }
+                }
             ]
         }
     },
@@ -70,7 +73,7 @@ const images = {
                 position: { x: 609, y: 293 },
                 rotate: 0,
                 scale: 1,
-                skew: { x: 0.01, y: 0.08 }
+                skew: { x: 0.01, y: 0.075 }
             },
             defaultStyle: {
                 font: 'Harmattan',
@@ -84,9 +87,14 @@ const images = {
                     shadowOffsetX: 1,
                     shadowOffsetY: 1}
             },
+            perspective: {
+                enabled: true,
+                leftScale: 1,
+                rightScale: 0.88
+            },
             lines: [
                 { text: "BRIAN AND LINDA'S" },
-                { text: "DRIVE IT DAY,     APR.  26" }
+                { text: "DRIVE IT DAY,     APR.  26"}
             ]
         }
     },
