@@ -76,7 +76,7 @@
                                         class="float-end"></span> </label>
                                 <textarea class="form-control" id="userText" rows="4">Your text here</textarea>
                             </div>
-                            <div class="row mb-2">
+                            <div class="row mb-2 non-overlay">
                                 <!-- Controls for adjusting the X and Y position -->
                                 <div class="col">
                                     <label for="textX" class="form-label">Position X</label>
@@ -102,7 +102,7 @@
                     <h2 class="accordion-header" id="headingUploadedImage">
                         <button class="accordion-button" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#collapseUploadedImage" aria-expanded="true"
-                                aria-controls="collapseUploadedImage">Overlay Options
+                                aria-controls="collapseUploadedImage">External Image Options
                         </button>
                     </h2>
                     <div id="collapseUploadedImage" class="accordion-collapse show"
@@ -128,19 +128,19 @@
 
                             <div class="row mb-2 overlay-only">
                                 <div class="col">
-                                    <label for="overlayOffsetX" class="form-label">Overlay Offset X</label>
+                                    <label for="overlayOffsetX" class="form-label">Sign Offset X</label>
                                     <input class="form-range" type="range" id="overlayOffsetX" min="-200" max="1000"
                                            value="0">
                                 </div>
                                 <div class="col">
-                                    <label for="overlayOffsetY" class="form-label">Overlay Offset Y</label>
-                                    <input class="form-range" type="range" id="overlayOffsetY" min="-200" max="1000"
+                                    <label for="overlayOffsetY" class="form-label">Sign Offset Y</label>
+                                    <input class="form-range" type="range" id="overlayOffsetY" min="-500" max="1000"
                                            value="0">
                                 </div>
                                 <div class="col">
-                                    <label for="scale" class="form-label">Sign Scale</label>
-                                    <input type="number" id="overlayScale" class="form-control" min="0.1" max="3"
-                                           step="0.1" value="1"/>
+                                    <label for="overlayScale" class="form-label">Sign Scale</label>
+                                    <input class="form-range" type="range" id="overlayScale" min="0" max="3"
+                                           step="0.01" value="1">
                                 </div>
                             </div>
                         </div>

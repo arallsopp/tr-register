@@ -26,3 +26,6 @@
     font-size: 0.8em;
     margin-bottom:0.2rem;
 }
+.form-control:disabled {
+    color:#7d7d7d;
+}

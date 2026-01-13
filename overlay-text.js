@@ -189,42 +189,6 @@ function renderImage(imageConfig, userText) {
 
 const overlayCache = {};
 
-function drawOverlay(imageConfig) {
-    const overlay = imageConfig.overlay;
-    if (!overlay?.enabled || !overlay.src) return;
-
-    if (!overlayCache[overlay.src]) {
-        const img = new Image();
-        img.src = overlay.src;
-        overlayCache[overlay.src] = img;
-    }
-
-    const img = overlayCache[overlay.src];
-    if (!img.complete || !img.naturalWidth) {
-        img.onload = () => updateAll();
-        return;
-    }
-
-    // 🔑 Use the SAME scale as the text block
-    const scale = imageConfig.overlay.transform.scale || 1;
-    const padding = overlay.padding ?? 0;
-
-    const w = img.naturalWidth * scale;
-    const h = img.naturalHeight * scale;
-
-    const x = canvas.width - w - padding;
-    const y = canvas.height - h - padding;
-
-    ctx.save();
-
-    // 🔒 Reset all transforms so anchoring is absolute
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-    ctx.drawImage(img, x, y, w, h);
-
-    ctx.restore();
-}
-
 // UI Wiring
 const imageChoiceSelect = document.getElementById('imageChoice');
 
@@ -259,6 +223,7 @@ function loadFromConfig(useSample = false) {
     document.getElementById('line-count-preference').textContent =
         img.meta.prompt ? `(${img.meta.prompt})` : '';
 
+    overlayToggle.dispatchEvent(new Event('change'));
 
 }
 
@@ -372,11 +337,13 @@ scale.addEventListener('input', () => {
     updateAll();
 });
 imageChoiceSelect.addEventListener('change', () => {
+
     // show/hide upload-only elements
     const uploadOnlyElements = document.getElementsByClassName("upload-only");
     for (let element of uploadOnlyElements) {
         element.classList.toggle('visually-hidden', images[imageChoiceSelect.value].meta.sourceType !== 'upload');
     }
+
     loadFromConfig(true);
     updateAll();
 });
@@ -423,6 +390,17 @@ overlayToggle.addEventListener('change', () => {
     if (img.overlay) {
         img.overlay.enabled = overlayToggle.checked;
         updateAll();
+    }
+
+    //update the UI
+    const overlayOnlyInputs = document.querySelectorAll(".overlay-only input"),
+          nonOverlayInputs = document.querySelectorAll(".non-overlay input");
+
+    for (let element of overlayOnlyInputs) {
+        element.disabled = !overlayToggle.checked;
+    }
+    for (let element of nonOverlayInputs) {
+        element.disabled = overlayToggle.checked;
     }
 });
 

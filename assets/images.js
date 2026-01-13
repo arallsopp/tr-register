@@ -223,7 +223,7 @@ const images = {
         },
         textBlock: {
             transform: {
-                position: { x: 0, y: 0 }, //not really text, just that overlay uses this.
+                position: { x: 28, y: 58 },
                 rotate: 0,
                 scale: 1,
                 skew: { x: 0, y: 0 }
