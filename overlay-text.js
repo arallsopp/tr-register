@@ -13,7 +13,9 @@ const textX = document.getElementById('textX'),
     overlayScale = document.getElementById('overlayScale'),
     imageChoiceSelect = document.getElementById('imageChoice'),
     uploadInput = document.getElementById('imageUpload'),
-    overlayToggle = document.getElementById('overlayToggle');
+    overlayToggle = document.getElementById('overlayToggle'),
+    cropX = document.getElementById('cropX'),
+    cropY = document.getElementById('cropY');
 
 //support upload image and utilise cache to avoid constant reloads.
 const imageCache = {};
@@ -290,6 +292,11 @@ function drawUploadedImageCrop(ctx, img, cw, ch, crop) {
         cropW = imgW;
         cropH = cropW / canvasAspect;
     }
+
+    //update controls as we go past
+    cropX.disabled = !(imgAspect > canvasAspect);
+    cropY.disabled = (imgAspect > canvasAspect);
+
 
     const maxX = imgW - cropW;
     const maxY = imgH - cropH;
