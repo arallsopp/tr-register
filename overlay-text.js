@@ -129,6 +129,13 @@ function renderImage(imageConfig, userText) {
                 //baseImage isn't set yet, so just draw a black box.
                 ctx.fillStyle = 'black';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                //and add instructions
+                ctx.fillStyle = 'white';
+                ctx.font = '40px racing';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('{awaiting image selection}', canvas.width / 2, canvas.height / 2);
             }
         } else {
             canvas.width = baseImage.naturalWidth;
