@@ -142,8 +142,7 @@ function renderTextBlock(ctx, block, userTextOverride) {
 
         const baselineAdjust = style.size * 0.35
         if (block.perspective?.enabled) {
-            // perspective renderer
-            console.log('perspective enabled');
+            // fake perspective/fontsize renderer
             drawPerspectiveText(ctx, line.text, style, block.perspective, (y / scale) + baselineAdjust);
         } else {
             // normal renderer
