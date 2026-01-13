@@ -4,6 +4,18 @@ const ctx = canvas.getContext('2d');
 const OUTPUT_WIDTH = 1360;
 const OUTPUT_HEIGHT = 765;
 
+// grab the controls
+const textX = document.getElementById('textX'),
+    textY = document.getElementById('textY'),
+    scale= document.getElementById('scale'),
+    overlayOffsetX = document.getElementById('overlayOffsetX'),
+    overlayOffsetY = document.getElementById('overlayOffsetY'),
+    overlayScale = document.getElementById('overlayScale'),
+    imageChoiceSelect = document.getElementById('imageChoice'),
+    uploadInput = document.getElementById('imageUpload'),
+    overlayToggle = document.getElementById('overlayToggle');
+
+
 // Load custom font
 Promise.all([
     document.fonts.load('75px chalkboard'),
@@ -190,7 +202,6 @@ function renderImage(imageConfig, userText) {
 const overlayCache = {};
 
 // UI Wiring
-const imageChoiceSelect = document.getElementById('imageChoice');
 
 Object.entries(images).forEach(([key, img]) => {
     const option = document.createElement('option');
@@ -296,13 +307,6 @@ function getBaseImage(imageConfig) {
     document.getElementById(id).addEventListener('input', updateAll);
 });
 
-const textX = document.getElementById('textX'),
-    textY = document.getElementById('textY'),
-    scale= document.getElementById('scale'),
-    overlayOffsetX = document.getElementById('overlayOffsetX'),
-    overlayOffsetY = document.getElementById('overlayOffsetY'),
-    overlayScale = document.getElementById('overlayScale');
-
 textX.addEventListener('input', () => {
     const img = images[imageChoiceSelect.value];
     img.textBlock.transform.position.x = parseFloat(textX.value);
@@ -365,7 +369,6 @@ document.getElementById('saveBtn').onclick = () => {
 
 //upload image
 let uploadedImage = null;
-const uploadInput = document.getElementById('imageUpload');
 
 uploadInput.addEventListener('change', () => {
     const file = uploadInput.files[0];
@@ -384,7 +387,6 @@ uploadInput.addEventListener('change', () => {
     img.src = URL.createObjectURL(file);
 });
 
-const overlayToggle = document.getElementById('overlayToggle');
 overlayToggle.addEventListener('change', () => {
     const img = images[imageChoiceSelect.value];
     if (img.overlay) {
@@ -413,8 +415,6 @@ cropY.addEventListener('input', () => {
     uploadCrop.offsetY = parseFloat(cropY.value);
     updateAll();
 });
-
-
 
 //handle initial load
 imageChoiceSelect.dispatchEvent(new Event('change'));
