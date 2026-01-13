@@ -27,7 +27,10 @@ Promise.all([
     document.fonts.load('75px Harmattan'),
     document.fonts.load('75px Racing Sans One'),
     document.fonts.load('75px Damion')
-]);
+]).then(() => {
+    //fonts are ready, we can render.
+    updateFormValuesFromURLParams();
+});
 
 function resolveLinesWithInheritance(configLines, userText) {
     if (!userText) return configLines;
@@ -155,6 +158,37 @@ function renderTextBlock(ctx, block, userTextOverride) {
     ctx.restore();
 }
 
+// Function to get URL parameters
+function getUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+        image: params.get('image'),
+        text: params.get('text')
+    };
+}
+
+// Function to update the select and textarea elements
+function updateFormValuesFromURLParams(){
+    const { image, text } = getUrlParams();
+
+    if (image) {
+        // Set the image selection
+        const imageChoice = document.getElementById('imageChoice');
+        const imageOption = [...imageChoice.options].find(option => option.value === image);
+        if (imageOption) {
+            imageChoice.value = imageOption.value;
+        }
+        imageChoice.dispatchEvent(new Event('change'));
+    }
+
+    if (text) {
+        // Set the textarea value, preserving spaces and newlines
+        const textarea = document.getElementById('userText');
+        textarea.value = decodeURIComponent(text);
+        textarea.dispatchEvent(new Event('input'));
+    }
+
+}
 
 function renderImage(imageConfig, userText) {
     const baseImage = getBaseImage(imageConfig);
@@ -375,6 +409,14 @@ function getBaseImage(imageConfig) {
     return imageCache[imageConfig.meta.src];
 }
 
+function updateUX() {
+    // show/hide upload-only elements based upon image selection
+    const uploadOnlyElements = document.getElementsByClassName("upload-only");
+    for (let element of uploadOnlyElements) {
+        element.classList.toggle('visually-hidden', images[imageChoiceSelect.value].meta.sourceType !== 'upload');
+    }
+}
+
 /* handle events */
 ['userText','rotate','skewX','skewY'].forEach(id => {
     document.getElementById(id).addEventListener('input', updateAll);
@@ -413,14 +455,9 @@ scale.addEventListener('input', () => {
     img.textBlock.transform.scale = parseFloat(scale.value);
     updateAll();
 });
+
 imageChoiceSelect.addEventListener('change', () => {
-
-    // show/hide upload-only elements
-    const uploadOnlyElements = document.getElementsByClassName("upload-only");
-    for (let element of uploadOnlyElements) {
-        element.classList.toggle('visually-hidden', images[imageChoiceSelect.value].meta.sourceType !== 'upload');
-    }
-
+    updateUX();
     loadFromConfig(true);
     updateAll();
 });
