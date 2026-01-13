@@ -15,8 +15,11 @@ const textX = document.getElementById('textX'),
     uploadInput = document.getElementById('imageUpload'),
     overlayToggle = document.getElementById('overlayToggle');
 
+//support upload image and utilise cache to avoid constant reloads.
+const imageCache = {};
+let uploadedImage = null;
 
-// Load custom font
+// Load custom fonts before we start rendering.
 Promise.all([
     document.fonts.load('75px chalkboard'),
     document.fonts.load('75px harmattan'),
@@ -290,11 +293,6 @@ function drawUploadedImageCrop(ctx, img, cw, ch, crop) {
     ctx.drawImage(img, sx, sy, cropW, cropH, 0, 0, cw, ch);
 }
 
-
-
-const imageCache = {};
-
-//use imageCache to avoid reloading all the time.
 function getBaseImage(imageConfig) {
     if (imageConfig.meta.sourceType === 'upload') {
         return uploadedImage;
@@ -375,8 +373,6 @@ document.getElementById('saveBtn').onclick = () => {
 };
 
 //upload image
-let uploadedImage = null;
-
 uploadInput.addEventListener('change', () => {
     const file = uploadInput.files[0];
     if (!file){
