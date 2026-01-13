@@ -24,8 +24,8 @@ let uploadedImage = null;
 // Load custom fonts before we start rendering.
 Promise.all([
     document.fonts.load('75px chalkboard'),
-    document.fonts.load('75px harmattan'),
-    document.fonts.load('75px racing'),
+    document.fonts.load('75px Harmattan'),
+    document.fonts.load('75px Racing Sans One'),
     document.fonts.load('75px Damion')
 ]);
 
@@ -135,7 +135,7 @@ function renderImage(imageConfig, userText) {
 
                 //and add instructions
                 ctx.fillStyle = 'white';
-                ctx.font = '40px racing';
+                ctx.font = '40px Racing Sans One';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText('{awaiting image selection}', canvas.width / 2, canvas.height / 2);

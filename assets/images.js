@@ -73,7 +73,7 @@ const images = {
                 skew: { x: 0.01, y: 0.08 }
             },
             defaultStyle: {
-                font: 'harmattan',
+                font: 'Harmattan',
                 size: 60,
                 color: 'rgb(243,222,194)',
                 align: 'left',
@@ -86,7 +86,7 @@ const images = {
             },
             lines: [
                 { text: "BRIAN AND LINDA'S" },
-                { text: 'DRIVE IT DAY, APR.  26' }
+                { text: "DRIVE IT DAY,     APR.  26" }
             ]
         }
     },
@@ -105,7 +105,7 @@ const images = {
                 skew: { x: 0, y: 0 }
             },
             defaultStyle: {
-                font: 'harmattan',
+                font: 'Harmattan',
                 size: 50,
                 color: 'rgb(246,240,211)',
                 align: 'center',
@@ -137,7 +137,7 @@ const images = {
                 skew: { x: 0, y: 0 }
             },
             defaultStyle: {
-                font: 'harmattan',
+                font: 'Harmattan',
                 size: 55,
                 color: 'rgb(246,226,205)',
                 align: 'left',
@@ -150,8 +150,8 @@ const images = {
                 }
             },
             lines: [
-                { text: 'LULWORTH MAY        17' },
-                { text: 'BRESSUIRE JUNE       21' }
+                { text: 'LULWORTH MAY          17' },
+                { text: 'BRESSUIRE JUNE         21' }
             ]
         }
     },
@@ -170,7 +170,7 @@ const images = {
                 skew: { x: 0, y: 0 }
             },
             defaultStyle: {
-                font: 'racing',
+                font: 'Racing Sans One',
                 size: 75,
                 color: 'rgb(38,62,47)',
                 align: 'right',
@@ -216,6 +216,38 @@ const images = {
             ]
         }
     },
+    image8: {
+        meta: {
+            name: 'Evening Road Run',
+            prompt: '2 lines',
+            src: 'assets/artwork/evening-road-run.jpg'
+        },
+        textBlock: {
+            transform: {
+                position: { x: 834, y: 330 },
+                rotate: 0,
+                scale: 1,
+                skew: { x: -0.05, y: -0.108 }
+            },
+            defaultStyle: {
+                font: 'Harmattan',
+                size: 47,
+                color: 'rgb(158,133,110)',
+                align: 'left',
+                lineHeight: 47,
+                shadow: {
+                    shadowColor: 'rgba(0,0,0,1)',
+                    shadowBlur: 2,
+                    shadowOffsetX: 2,
+                    shadowOffsetY: 2
+                }
+            },
+            lines: [
+                { text: 'EVENING ROAD RUN   9/5' },
+                { text: 'TIM + SAM                  5:45' }
+            ]
+        }
+    },
     upload: {
         meta: {
             name: 'Uploaded Image',
@@ -236,7 +268,7 @@ const images = {
                 skew: { x: 0, y: 0 }
             },
             defaultStyle: {
-                font: 'harmattan',
+                font: 'Harmattan',
                 size: 82,
                 color: '#faf0d7',
                 align: 'left',
