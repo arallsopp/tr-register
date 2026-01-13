@@ -114,13 +114,19 @@ function renderImage(imageConfig, userText) {
             canvas.width = OUTPUT_WIDTH;
             canvas.height = OUTPUT_HEIGHT;
 
-            drawUploadedImageCrop(
-                ctx,
-                baseImage,
-                canvas.width,
-                canvas.height,
-                uploadCrop
-            );
+            if(baseImage) {
+                drawUploadedImageCrop(
+                    ctx,
+                    baseImage,
+                    canvas.width,
+                    canvas.height,
+                    uploadCrop
+                );
+            }else{
+                //baseImage isn't set yet, so just draw a black box.
+                ctx.fillStyle = 'black';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
         } else {
             canvas.width = baseImage.naturalWidth;
             canvas.height = baseImage.naturalHeight;
@@ -195,6 +201,7 @@ function renderImage(imageConfig, userText) {
         }
     }else{
         //baseImage isn't set yet.
+        draw();
     }
 }
 
