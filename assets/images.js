@@ -248,8 +248,8 @@ const images = {
                 }
             },
             lines: [
-                { text: 'EVENING ROAD RUN   9/5' },
-                { text: 'TIM + SAM                  5:45' }
+                { text: 'EVENING ROAD RUN      9/5' },
+                { text: 'TIM + SAM                     5:45'}
             ]
         }
     },
