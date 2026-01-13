@@ -175,10 +175,14 @@ function renderImage(imageConfig, userText) {
         }
     };
 
-    if (baseImage.complete && baseImage.naturalWidth) {
-        draw();
-    } else {
-        baseImage.onload = draw;
+    if(baseImage) {
+        if (baseImage.complete && baseImage.naturalWidth) {
+            draw();
+        } else {
+            baseImage.onload = draw;
+        }
+    }else{
+        //baseImage isn't set yet.
     }
 }
 
@@ -220,14 +224,6 @@ function drawOverlay(imageConfig) {
 
     ctx.restore();
 }
-
-
-
-
-
-
-
-
 
 // UI Wiring
 const imageChoiceSelect = document.getElementById('imageChoice');
@@ -332,30 +328,32 @@ function getBaseImage(imageConfig) {
 
 const textX = document.getElementById('textX'),
     textY = document.getElementById('textY'),
-    scale= document.getElementById('scale');
+    scale= document.getElementById('scale'),
+    overlayOffsetX = document.getElementById('overlayOffsetX'),
+    overlayOffsetY = document.getElementById('overlayOffsetY');
+
 textX.addEventListener('input', () => {
     const img = images[imageChoiceSelect.value];
-    const val = parseFloat(textX.value);
-
-    if (img.overlay?.enabled) {
-        img.overlay.offset.x = val;
-    } else {
-        img.textBlock.transform.position.x = val;
-    }
-
+    img.textBlock.transform.position.x = parseFloat(textX.value);
     updateAll();
 });
 
 textY.addEventListener('input', () => {
     const img = images[imageChoiceSelect.value];
-    const val = parseFloat(textY.value);
+    img.textBlock.transform.position.y = parseFloat(textY.value);
+    updateAll();
+});
+overlayOffsetX.addEventListener('input', () => {
+    const img = images[imageChoiceSelect.value];
+    img.overlay.offset.x = parseFloat(overlayOffsetX.value);
+    console.log(img.overlay.offset);
+    updateAll();
+});
 
-    if (img.overlay?.enabled) {
-        img.overlay.offset.y = val;
-    } else {
-        img.textBlock.transform.position.y = val;
-    }
-
+overlayOffsetY.addEventListener('input', () => {
+    const img = images[imageChoiceSelect.value];
+    img.overlay.offset.y = parseFloat(overlayOffsetY.value);
+    console.log(img.overlay.offset);
     updateAll();
 });
 
