@@ -69,8 +69,6 @@ function drawPerspectiveText(ctx, text, style, perspective, y) {
         ctx.measureText(c).width
     );
 
-    const totalBaseWidth = baseWidths.reduce((a, b) => a + b, 0);
-
     let x = 0;
 
     chars.forEach((char, i) => {
@@ -98,7 +96,7 @@ function drawPerspectiveText(ctx, text, style, perspective, y) {
 
         ctx.restore();
 
-        // 🔑 ADVANCE IS SCALED
+        // Amount of ADVANCE is SCALED
         x += charWidth;
     });
 }
