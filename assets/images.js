@@ -94,7 +94,7 @@ const images = {
             },
             lines: [
                 { text: "BRIAN AND LINDA'S" },
-                { text: "DRIVE IT DAY,     APR.  26"}
+                { text: "DRIVE IT DAY,  APRIL     26"}
             ]
         }
     },
