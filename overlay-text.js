@@ -67,7 +67,7 @@ function renderTextBlock(ctx, block, userTextOverride) {
     }
 
     ctx.textAlign = defaultStyle.align;
-    ctx.textBaseline = 'middle';
+    ctx.textBaseline = 'alphabetic'; //try to stabilise Y position on iOS/Safari
 
     const activeLines = resolveLinesWithInheritance(lines, userTextOverride);
 
@@ -92,7 +92,8 @@ function renderTextBlock(ctx, block, userTextOverride) {
             ctx.shadowColor = 'transparent';
         }
 
-        ctx.fillText(line.text, 0, y / scale);
+        const baselineAdjust = style.size * 0.35
+        ctx.fillText(line.text, 0, (y / scale) + baselineAdjust);
         ctx.restore();
 
         y += style.lineHeight * scale;

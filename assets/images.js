@@ -65,7 +65,7 @@ const images = {
         },
         textBlock: {
             transform: {
-                position: { x: 609, y: 305 },
+                position: { x: 609, y: 293 },
                 rotate: 0,
                 scale: 1,
                 skew: { x: 0.01, y: 0.08 }
@@ -97,7 +97,7 @@ const images = {
         },
         textBlock: {
             transform: {
-                position: { x: 770, y: 385 },
+                position: { x: 770, y: 375 },
                 rotate: 0,
                 scale: 1,
                 skew: { x: 0, y: 0 }
@@ -105,7 +105,7 @@ const images = {
             defaultStyle: {
                 font: 'harmattan',
                 size: 50,
-                color: 'rgb(244,235,194)',
+                color: 'rgb(246,240,211)',
                 align: 'center',
                 lineHeight: 43,
                 shadow: {
@@ -129,7 +129,7 @@ const images = {
         },
         textBlock: {
             transform: {
-                position: { x: 755, y: 801 },
+                position: { x: 755, y: 790 },
                 rotate: 0,
                 scale: 1,
                 skew: { x: 0, y: 0 }
@@ -137,10 +137,15 @@ const images = {
             defaultStyle: {
                 font: 'harmattan',
                 size: 55,
-                color: 'rgba(255,255,255,0.95)',
+                color: 'rgb(246,226,205)',
                 align: 'left',
                 lineHeight: 49,
-                shadow: null
+                shadow: {
+                    shadowColor: 'rgba(0,0,0,1)',
+                    shadowBlur: 2,
+                    shadowOffsetX: 1,
+                    shadowOffsetY: 1
+                }
             },
             lines: [
                 { text: 'LULWORTH MAY        17' },
@@ -157,7 +162,7 @@ const images = {
         },
         textBlock: {
             transform: {
-                position: { x: 1310, y: 82 },
+                position: { x: 1310, y: 62 },
                 rotate: 0,
                 scale: 1,
                 skew: { x: 0, y: 0 }
@@ -187,7 +192,7 @@ const images = {
         },
         textBlock: {
             transform: {
-                position: { x: 716, y: 90 },
+                position: { x: 716, y: 75 },
                 rotate: 0,
                 scale: 1,
                 skew: { x: 0, y: 0 }
@@ -219,7 +224,7 @@ const images = {
             src: 'assets/overlays/redpost.png',
             scale: 0.4,
             offset: {x:30, y:0}, // pixels from bottom right
-            textOffset: { x: 80, y: 376 } // position of text relative to overlay's top-left
+            textOffset: { x: 80, y: 357 } // position of text relative to overlay's top-left
         },
         textBlock: {
             transform: {
