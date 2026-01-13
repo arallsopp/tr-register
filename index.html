@@ -52,6 +52,9 @@
                 <label for="imageChoice" class="form-label">Choose an Image:</label> <select class="form-select"
                                                                                              id="imageChoice"></select>
             </div>
+            <div class="mb-2 upload-only visually-hidden">
+                <input class="form-control" type="file" id="imageUpload" accept="image/*"/>
+            </div>
             <div class="accordion" id="accordionControls">
                <div class="accordion-item">
                     <h2 class="accordion-header" id="headingImageText">
@@ -86,21 +89,17 @@
                     </div>
                 </div>
                 <!-- hidden image upload options -->
-                <div id="imageUploadOptions"
-                     class="accordion-item visually-hidden"><!-- hidden by default, revealed  when selected  -->
+                <div class="accordion-item upload-only visually-hidden"><!-- hidden by default, revealed  when selected  -->
                     <h2 class="accordion-header" id="headingUploadedImage">
                         <button class="accordion-button" type="button" data-bs-toggle="collapse"
                                 data-bs-target="#collapseUploadedImage" aria-expanded="true"
-                                aria-controls="collapseUploadedImage">Uploaded Image
+                                aria-controls="collapseUploadedImage">Overlay Options
                         </button>
                     </h2>
                     <div id="collapseUploadedImage" class="accordion-collapse show"
                          aria-labelledby="headingUploadedImage" data-bs-parent="#accordionControls">
                         <div class="accordion-body">
 
-                            <div class="mb-2">
-                                <input class="form-control" type="file" id="imageUpload" accept="image/*"/>
-                            </div>
                             <div class="form-check mb-2">
                                 <input class="form-check-input" type="checkbox" value="" id="overlayToggle"> <label
                                     class="form-check-label" for="overlayToggle"> Overlay Sign Post </label>

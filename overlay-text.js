@@ -337,7 +337,11 @@ function renderTextBlock(ctx, block, userTextOverride) {
 
 function renderImage(imageConfig, userText) {
     const baseImage = getBaseImage(imageConfig);
-    if (!baseImage) return;
+    if (!baseImage){
+        console.log('baseImage is not ready yet');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    }
 
     const draw = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -612,9 +616,11 @@ scale.addEventListener('input', () => {
     updateAll();
 });
 imageChoiceSelect.addEventListener('change', () => {
-    document.getElementById("imageUploadOptions").classList
-        .toggle('visually-hidden', images[imageChoiceSelect.value].meta.sourceType !== 'upload');
-
+    // show/hide upload-only elements
+    const uploadOnlyElements = document.getElementsByClassName("upload-only");
+    for (let element of uploadOnlyElements) {
+        element.classList.toggle('visually-hidden', images[imageChoiceSelect.value].meta.sourceType !== 'upload');
+    }
     loadFromConfig(true);
     updateAll();
 });
@@ -640,7 +646,10 @@ const uploadInput = document.getElementById('imageUpload');
 
 uploadInput.addEventListener('change', () => {
     const file = uploadInput.files[0];
-    if (!file) return;
+    if (!file){
+        console.log('no file');
+        return;
+    }
 
     const img = new Image();
 
