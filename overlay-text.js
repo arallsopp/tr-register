@@ -296,7 +296,7 @@ function drawUploadedImageCrop(ctx, img, cw, ch, crop) {
 
     //update controls as we go past
     cropX.disabled = !(imgAspect > canvasAspect);
-    cropY.disabled = (imgAspect > canvasAspect);
+    cropY.disabled = (imgAspect >= canvasAspect);
 
 
     const maxX = imgW - cropW;
