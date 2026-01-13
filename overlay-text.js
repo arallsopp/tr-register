@@ -52,6 +52,33 @@ function resolveLinesWithInheritance(configLines, userText) {
         };
     });
 }
+
+function drawPerspectiveText(ctx, text, style, perspective, y) {
+    const chars = [...text];
+
+    ctx.font = `${style.size}px ${style.font}`;
+    ctx.fillStyle = style.color;
+    ctx.textBaseline = 'alphabetic';
+
+    const widths = chars.map(c => ctx.measureText(c).width);
+    const totalWidth = widths.reduce((a, b) => a + b, 0);
+
+    let cursorX = 0;
+
+    chars.forEach((char, i) => {
+        const t = cursorX / totalWidth;
+        const scale =
+            perspective.leftScale +
+            t * (perspective.rightScale - perspective.leftScale);
+
+        ctx.save();
+        ctx.scale(scale, scale);
+        ctx.fillText(char, cursorX / scale, y / scale);
+        ctx.restore();
+
+        cursorX += widths[i];
+    });
+}
 function renderTextBlock(ctx, block, userTextOverride) {
     const { transform, defaultStyle, lines } = block;
     const blockScale = transform.scale || 1;
@@ -93,9 +120,15 @@ function renderTextBlock(ctx, block, userTextOverride) {
         }
 
         const baselineAdjust = style.size * 0.35
-        ctx.fillText(line.text, 0, (y / scale) + baselineAdjust);
+        if (block.perspective?.enabled) {
+            // perspective renderer
+            console.log('perspective enabled');
+            drawPerspectiveText(ctx, line.text, style, block.perspective, (y / scale) + baselineAdjust);
+        } else {
+            // normal renderer
+            ctx.fillText(line.text, 0, (y / scale) + baselineAdjust);
+        }
         ctx.restore();
-
         y += style.lineHeight * scale;
     });
 

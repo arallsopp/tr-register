@@ -229,6 +229,11 @@ const images = {
                 scale: 1,
                 skew: { x: -0.01, y: -0.1 }
             },
+            perspective: {
+                    enabled: true,
+                    leftScale: 0.88,
+                    rightScale: 1.0
+            },
             defaultStyle: {
                 font: 'Harmattan',
                 size: 42,
