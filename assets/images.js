@@ -224,17 +224,17 @@ const images = {
         },
         textBlock: {
             transform: {
-                position: { x: 834, y: 330 },
+                position: { x: 907, y: 260 },
                 rotate: 0,
                 scale: 1,
-                skew: { x: -0.05, y: -0.108 }
+                skew: { x: -0.07, y: -0.1 }
             },
             defaultStyle: {
                 font: 'Harmattan',
-                size: 47,
+                size: 42,
                 color: 'rgb(158,133,110)',
                 align: 'left',
-                lineHeight: 47,
+                lineHeight: 39,
                 shadow: {
                     shadowColor: 'rgba(0,0,0,1)',
                     shadowBlur: 2,
