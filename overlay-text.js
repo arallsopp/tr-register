@@ -134,7 +134,7 @@ function renderImage(imageConfig, userText) {
             }
 
             // ---- draw overlay ----
-            const scale = imageConfig.textBlock.transform.scale || 1;
+            const scale = imageConfig.overlay.scale || 1;
 
             const w = overlayImg.naturalWidth * scale;
             const h = overlayImg.naturalHeight * scale;
@@ -206,7 +206,7 @@ function drawOverlay(imageConfig) {
     }
 
     // 🔑 Use the SAME scale as the text block
-    const scale = imageConfig.textBlock.transform.scale || 1;
+    const scale = imageConfig.overlay.transform.scale || 1;
     const padding = overlay.padding ?? 0;
 
     const w = img.naturalWidth * scale;
@@ -245,7 +245,12 @@ function loadFromConfig(useSample = false) {
     rotate.value = t.rotate || 0;
     skewX.value = t.skew?.x || 0;
     skewY.value = t.skew?.y || 0;
+
     overlayToggle.checked = img.overlay?.enabled || 0
+    overlayOffsetX.value = img.overlay?.offset?.x || 0;
+    overlayOffsetY.value = img.overlay?.offset?.y || 0;
+    overlayScale.value = img.overlay?.scale || 1;
+
     if (useSample) {
         userText.value = img.textBlock.lines.map(l => l.text).join('\n');
     }
@@ -330,7 +335,8 @@ const textX = document.getElementById('textX'),
     textY = document.getElementById('textY'),
     scale= document.getElementById('scale'),
     overlayOffsetX = document.getElementById('overlayOffsetX'),
-    overlayOffsetY = document.getElementById('overlayOffsetY');
+    overlayOffsetY = document.getElementById('overlayOffsetY'),
+    overlayScale = document.getElementById('overlayScale');
 
 textX.addEventListener('input', () => {
     const img = images[imageChoiceSelect.value];
@@ -349,14 +355,17 @@ overlayOffsetX.addEventListener('input', () => {
     console.log(img.overlay.offset);
     updateAll();
 });
-
 overlayOffsetY.addEventListener('input', () => {
     const img = images[imageChoiceSelect.value];
     img.overlay.offset.y = parseFloat(overlayOffsetY.value);
     console.log(img.overlay.offset);
     updateAll();
 });
-
+overlayScale.addEventListener('input', () => {
+    const img = images[imageChoiceSelect.value];
+    img.overlay.scale = parseFloat(overlayScale.value);
+    updateAll();
+})
 scale.addEventListener('input', () => {
     const img = images[imageChoiceSelect.value];
     img.textBlock.transform.scale = parseFloat(scale.value);

@@ -67,15 +67,15 @@ const images = {
             transform: {
                 position: { x: 609, y: 305 },
                 rotate: 0,
-                scale: 1.2,
+                scale: 1,
                 skew: { x: 0.01, y: 0.08 }
             },
             defaultStyle: {
                 font: 'harmattan',
-                size: 50,
+                size: 60,
                 color: 'rgb(243,222,194)',
                 align: 'left',
-                lineHeight: 43,
+                lineHeight: 52,
                 shadow: {
                     shadowColor: 'rgba(0,0,0,0.8)',
                     shadowBlur: 1,
@@ -131,15 +131,15 @@ const images = {
             transform: {
                 position: { x: 755, y: 801 },
                 rotate: 0,
-                scale: 1.1,
+                scale: 1,
                 skew: { x: 0, y: 0 }
             },
             defaultStyle: {
                 font: 'harmattan',
-                size: 50,
+                size: 55,
                 color: 'rgba(255,255,255,0.95)',
                 align: 'left',
-                lineHeight: 43,
+                lineHeight: 49,
                 shadow: null
             },
             lines: [
@@ -159,15 +159,15 @@ const images = {
             transform: {
                 position: { x: 1310, y: 82 },
                 rotate: 0,
-                scale: 1.5,
+                scale: 1,
                 skew: { x: 0, y: 0 }
             },
             defaultStyle: {
                 font: 'racing',
-                size: 50,
+                size: 75,
                 color: 'rgb(38,62,47)',
                 align: 'right',
-                lineHeight: 43,
+                lineHeight: 65,
                 shadow: null
             },
             lines: [
@@ -189,15 +189,15 @@ const images = {
             transform: {
                 position: { x: 716, y: 90 },
                 rotate: 0,
-                scale: 2.5,
+                scale: 1,
                 skew: { x: 0, y: 0 }
             },
             defaultStyle: {
                 font: 'Damion',
-                size: 50,
+                size: 125,
                 color: 'rgb(28,41,25)',
                 align: 'center',
-                lineHeight: 43,
+                lineHeight: 107,
                 shadow: null
             },
             lines: [
@@ -219,21 +219,21 @@ const images = {
             src: 'assets/overlays/redpost.png',
             scale: 0.4,
             offset: {x:30, y:0}, // pixels from bottom right
-            textOffset: { x: 80, y: 380 } // position of text relative to overlay's top-left
+            textOffset: { x: 80, y: 376 } // position of text relative to overlay's top-left
         },
         textBlock: {
             transform: {
                 position: { x: 0, y: 0 }, //not really text, just that overlay uses this.
                 rotate: 0,
-                scale: 0.4,
+                scale: 1,
                 skew: { x: 0, y: 0 }
             },
             defaultStyle: {
                 font: 'harmattan',
-                size: 65,
+                size: 82,
                 color: '#faf0d7',
                 align: 'left',
-                lineHeight: 65,
+                lineHeight: 67,
                 shadow: {
                     shadowColor: 'rgba(0,0,0,1)',
                     shadowBlur: 3,
@@ -242,7 +242,8 @@ const images = {
                 }
             },
             lines: [
-                { text: 'Your Text Here\nLine 2' }
+                { text: 'SIGN PRIMARY LINE   1\n' +
+                        'SIGN NEXT LINE          2' }
             ]
         }
     }
