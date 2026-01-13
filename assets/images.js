@@ -16,7 +16,7 @@ const images = {
             defaultStyle: {
                 font: 'chalkboard',
                 size: 75,
-                color: 'white',
+                color: 'rgba(255,255,255,0.8)',
                 align: 'left',
                 lineHeight: 90,
                 shadow: null
@@ -43,7 +43,7 @@ const images = {
             defaultStyle: {
                 font: 'chalkboard',
                 size: 50,
-                color: 'white',
+                color: 'rgba(255,255,255,0.8)',
                 align: 'left',
                 lineHeight: 60,
                 shadow: null
