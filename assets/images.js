@@ -227,7 +227,7 @@ const images = {
                 position: { x: 907, y: 260 },
                 rotate: 0,
                 scale: 1,
-                skew: { x: -0.01, y: -0.1 }
+                skew: { x: -0.01, y: -0.09 }
             },
             perspective: {
                     enabled: true,

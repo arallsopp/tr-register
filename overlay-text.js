@@ -54,29 +54,52 @@ function resolveLinesWithInheritance(configLines, userText) {
 }
 
 function drawPerspectiveText(ctx, text, style, perspective, y) {
+    const {
+        leftScale = 0.7,
+        rightScale = 1,
+        skewX = 0,
+        skewY = 0
+    } = perspective;
+
     const chars = [...text];
+    const charCount = chars.length;
 
-    ctx.font = `${style.size}px ${style.font}`;
-    ctx.fillStyle = style.color;
-    ctx.textBaseline = 'alphabetic';
+    // Measure each character once
+    const baseWidths = chars.map(c =>
+        ctx.measureText(c).width
+    );
 
-    const widths = chars.map(c => ctx.measureText(c).width);
-    const totalWidth = widths.reduce((a, b) => a + b, 0);
+    const totalBaseWidth = baseWidths.reduce((a, b) => a + b, 0);
 
-    let cursorX = 0;
+    let x = 0;
 
     chars.forEach((char, i) => {
-        const t = cursorX / totalWidth;
-        const scale =
-            perspective.leftScale +
-            t * (perspective.rightScale - perspective.leftScale);
+        const t = charCount === 1 ? 0 : i / (charCount - 1);
+        const scale = leftScale + t * (rightScale - leftScale);
+
+        const charWidth = baseWidths[i] * scale;
 
         ctx.save();
-        ctx.scale(scale, scale);
-        ctx.fillText(char, cursorX / scale, y / scale);
+
+        // Move to character origin
+        ctx.translate(x, y);
+
+        // Apply perspective
+        ctx.transform(
+            scale,      // scale X
+            skewY,      // skew Y
+            skewX,      // skew X
+            scale,      // scale Y
+            0,
+            0
+        );
+
+        ctx.fillText(char, 0, 0);
+
         ctx.restore();
 
-        cursorX += widths[i];
+        // 🔑 ADVANCE IS SCALED
+        x += charWidth;
     });
 }
 function renderTextBlock(ctx, block, userTextOverride) {
