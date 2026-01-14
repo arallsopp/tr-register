@@ -21,3 +21,23 @@
 .form-control:disabled {
     color:#7d7d7d;
 }
+/* scrollable column setup */
+.scroll-column {
+    overflow-y: initial;
+    max-height:none; /* no vertical scroll */
+    margin-bottom: 1em;
+}
+
+@media (min-width: 992px) {
+    /* desktop screens, the scroll-column scrolls */
+    .scroll-column{
+        overflow-y: auto;
+        max-height: calc(100vh - 6em); /* Allow vertical scroll */
+    }
+
+    /* Make the second column sticky on desktop */
+    .sticky-column {
+        position: sticky;
+        top: 0;
+    }
+}
