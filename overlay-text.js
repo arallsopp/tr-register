@@ -138,11 +138,19 @@ function renderTextBlock(ctx, block, userTextOverride) {
 
         const baselineAdjust = style.size * 0.35
         if (block.perspective?.enabled) {
-            // fake perspective/fontsize renderer
             drawPerspectiveText(ctx, line.text, style, block.perspective, (y / scale) + baselineAdjust);
+
+            // compute line advance using perspective
+            const lineChars = [...line.text];
+            let lineScale = 1;
+            for (let i = 0; i < lineChars.length; i++) {
+                lineScale += block.perspective.perspectiveScaleIncrement || 0.02;
+            }
+
+            y += style.lineHeight * lineScale * scale;
         } else {
-            // normal renderer
             ctx.fillText(line.text, 0, (y / scale) + baselineAdjust);
+            y += style.lineHeight * scale;
         }
         ctx.restore();
         y += style.lineHeight * scale;
