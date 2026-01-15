@@ -32,6 +32,10 @@ Promise.all([
     updateFormValuesFromURLParams();
 });
 
+function perspectiveScaleAt(t, perspective) {
+    return perspective.leftScale +
+        (perspective.rightScale - perspective.leftScale) * t;
+}
 function resolveLinesWithInheritance(configLines, userText) {
     if (!userText) return configLines;
 
@@ -57,12 +61,6 @@ function resolveLinesWithInheritance(configLines, userText) {
 }
 
 function drawPerspectiveText(ctx, text, style, perspective, y) {
-    const {
-        leftScale = 0.7,
-        rightScale = 1,
-        skewX = 0,
-        skewY = 0
-    } = perspective;
 
     const chars = [...text];
     const charCount = chars.length;
@@ -76,9 +74,10 @@ function drawPerspectiveText(ctx, text, style, perspective, y) {
 
     chars.forEach((char, i) => {
         const t = charCount === 1 ? 0 : i / (charCount - 1);
-        const scale = leftScale + t * (rightScale - leftScale);
-
-        const charWidth = baseWidths[i] * scale;
+        const charPerspectiveScale =
+            lerp(perspective.leftScale, perspective.rightScale, t);
+        const charScale = blockScale * charPerspectiveScale;
+        const charWidth = baseWidths[i] * charScale;
 
         ctx.save();
 
@@ -87,22 +86,39 @@ function drawPerspectiveText(ctx, text, style, perspective, y) {
 
         // Apply perspective
         ctx.transform(
-            scale,      // scale X
+            charScale,      // scale X
             skewY,      // skew Y
             skewX,      // skew X
-            scale,      // scale Y
+            charScale,      // scale Y
             0,
             0
         );
 
-        ctx.fillText(char, 0, 0);
-
+        const baselineAdjust = style.size * 0.35;
+        ctx.fillText(char, 0, (y / charScale) + baselineAdjust);
         ctx.restore();
 
         // Amount of ADVANCE is SCALED
         x += charWidth;
     });
 }
+function computePerspectiveLineAdvance({
+                                           text,
+                                           style,
+                                           blockScale,
+                                           perspective
+                                       }) {
+    if (!perspective?.enabled) {
+        return style.lineHeight * blockScale;
+    }
+
+    // Use the same scale logic as characters
+    const nearScale = perspective.rightScale; // biggest characters
+    const baseLineHeight = style.lineHeight;
+
+    return baseLineHeight * blockScale * nearScale;
+}
+
 function renderTextBlock(ctx, block, userTextOverride) {
     const { transform, defaultStyle, lines } = block;
     const blockScale = transform.scale || 1;
@@ -126,10 +142,10 @@ function renderTextBlock(ctx, block, userTextOverride) {
 
     activeLines.forEach(line => {
         const style = { ...defaultStyle, ...line.style };
-        const scale = line.transform?.scale ?? 1;
+        const lineScale = line.transform?.scale ?? 1;
 
         ctx.save();
-        ctx.scale(scale, scale);
+        ctx.scale(lineScale, lineScale);
 
         ctx.font = `${style.size}px ${style.font}`;
         ctx.fillStyle = style.color;
@@ -146,13 +162,50 @@ function renderTextBlock(ctx, block, userTextOverride) {
         const baselineAdjust = style.size * 0.35
         if (block.perspective?.enabled) {
             // fake perspective/fontsize renderer
-            drawPerspectiveText(ctx, line.text, style, block.perspective, (y / scale) + baselineAdjust);
+            let yCursor = 0;
+
+            lines.forEach((line, lineIndex) => {
+
+                // draw the line
+                drawPerspectiveText({
+                    ctx,
+                    text: line.text,
+                    yBase: yCursor,
+                    blockScale,
+                    perspective:block.perspective,
+                    style
+                });
+
+                // advance y using perspective-aware height
+                yCursor += computePerspectiveLineAdvance({
+                    text: line.text,
+                    style,
+                    blockScale,
+                    perspective
+                });
+            });
         } else {
             // normal renderer
-            ctx.fillText(line.text, 0, (y / scale) + baselineAdjust);
+            ctx.fillText(line.text, 0, y + baselineAdjust);
         }
         ctx.restore();
-        y += style.lineHeight * scale;
+
+        //apply perspective to line anchor
+        const perspective = block.perspective;
+
+        const perspectiveLineScale = perspective?.enabled
+            ? Math.max(perspective.leftScale, perspective.rightScale)
+            : 1;
+
+        const effectiveCharHeight =
+            style.size *
+            blockScale *
+            lineScale *
+            perspectiveLineScale;
+
+        const lineHeightMultiplier = style.lineHeight / style.size;
+
+        y += effectiveCharHeight * lineHeightMultiplier;
     });
 
     ctx.restore();
