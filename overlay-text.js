@@ -32,6 +32,40 @@ Promise.all([
     updateFormValuesFromURLParams();
 });
 
+function renderTextToOffScreenCanvas(text, options) {
+    const {
+        font = "48px sans-serif",
+        lineHeight = 1.2,
+        padding = 20
+    } = options;
+
+    const lines = text.split("\n");
+
+    const tmp = document.createElement("canvas");
+    const ctx = tmp.getContext("2d");
+
+    ctx.font = font;
+
+    const fontSize = parseInt(font, 10);
+    const lh = fontSize * lineHeight;
+
+    const width = Math.max(...lines.map(l => ctx.measureText(l).width));
+    const height = lh * lines.length;
+
+    tmp.width = width + padding * 2;
+    tmp.height = height + padding * 2;
+
+    ctx.font = font;
+    ctx.fillStyle = "black";
+    ctx.textBaseline = "top";
+
+    lines.forEach((line, i) => {
+        ctx.fillText(line, padding, padding + i * lh);
+    });
+
+    return tmp;
+}
+
 function resolveLinesWithInheritance(configLines, userText) {
     if (!userText) return configLines;
 
@@ -56,52 +90,43 @@ function resolveLinesWithInheritance(configLines, userText) {
     });
 }
 
-function drawPerspectiveText(ctx, text, style, perspective, y) {
+function drawPerspectiveText(ctx, srcCanvas, options) {
     const {
-        leftScale = 0.7,
-        rightScale = 1,
-        skewX = 0,
-        skewY = 0
-    } = perspective;
+        x = 0,
+        y = 0,
+        slices = 300,
+        maxScaleX = 2.0,
+        maxScaleY = 2.5
+    } = options;
 
-    const chars = [...text];
-    const charCount = chars.length;
+    const sw = srcCanvas.width;
+    const sh = srcCanvas.height;
 
-    // Measure each character once
-    const baseWidths = chars.map(c =>
-        ctx.measureText(c).width
-    );
+    for (let i = 0; i < slices; i++) {
+        const t = i / (slices - 1);
 
-    let x = 0;
+        // perspective curve (quadratic looks better than linear)
+        const px = t * t;
 
-    chars.forEach((char, i) => {
-        const t = charCount === 1 ? 0 : i / (charCount - 1);
-        const scale = leftScale + t * (rightScale - leftScale);
+        const scaleX = 1 + px * (maxScaleX - 1);
+        const scaleY = 1 + px * (maxScaleY - 1);
 
-        const charWidth = baseWidths[i] * scale;
+        const srcX = (i / slices) * sw;
+        const srcW = sw / slices;
 
-        ctx.save();
+        const dstX = x + srcX * scaleX;
+        const dstW = srcW * scaleX;
 
-        // Move to character origin
-        ctx.translate(x, y);
+        // vertical growth pushes text upward
+        const dstH = sh * scaleY;
+        const dstY = y - (dstH - sh);
 
-        // Apply perspective
-        ctx.transform(
-            scale,      // scale X
-            skewY,      // skew Y
-            skewX,      // skew X
-            scale,      // scale Y
-            0,
-            0
+        ctx.drawImage(
+            srcCanvas,
+            srcX, 0, srcW, sh,
+            dstX, dstY, dstW, dstH
         );
-
-        ctx.fillText(char, 0, 0);
-
-        ctx.restore();
-
-        // Amount of ADVANCE is SCALED
-        x += charWidth;
-    });
+    }
 }
 function renderTextBlock(ctx, block, userTextOverride) {
     const { transform, defaultStyle, lines } = block;
@@ -145,8 +170,23 @@ function renderTextBlock(ctx, block, userTextOverride) {
 
         const baselineAdjust = style.size * 0.35
         if (block.perspective?.enabled) {
-            // fake perspective/fontsize renderer
-            drawPerspectiveText(ctx, line.text, style, block.perspective, (y / scale) + baselineAdjust);
+            // perspective via slicing
+            const textCanvas = renderTextToOffScreenCanvas(
+                "Perspective Text\nSecond Line",
+                {
+                    font: "48px Arial",
+                    lineHeight: 1.3
+                }
+            );
+
+            drawPerspectiveText(ctx, textCanvas, {
+                x: 50,
+                y: 200,
+                slices: 400,
+                maxScaleX: 2.2,
+                maxScaleY: 2.8
+            });
+
         } else {
             // normal renderer
             ctx.fillText(line.text, 0, (y / scale) + baselineAdjust);

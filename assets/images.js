@@ -238,9 +238,10 @@ const images = {
                 skew: { x: -0.01, y: -0.09 }
             },
             perspective: {
-                    enabled: true,
-                    leftScale: 0.88,
-                    rightScale: 1.0
+                enabled: true,
+                leftScale: 0.88,
+                rightScale: 1.0,
+                lineAnchor: 0 // far edge
             },
             defaultStyle: {
                 font: 'Harmattan',
@@ -258,6 +259,46 @@ const images = {
             lines: [
                 { text: 'EVENING ROAD RUN      9/5' },
                 { text: 'TIM + SAM                     5:45'}
+            ]
+        }
+    },
+    test: {
+        meta: {
+            name: 'Test',
+            prompt: '2 lines',
+            src: 'assets/artwork/blank.gif'
+        },
+        textBlock: {
+            transform: {
+                position: { x: 50, y: 100 },
+                rotate: 0,
+                scale: 1,
+                skew: { x: -0, y: -0 }
+            },
+            perspective: {
+                enabled: true,
+                perspectiveScaleIncrement: 0.05,
+                skewX: 0,
+                skewY: 0,
+                rightScale: 1.0,
+                lineAnchor: 0 // far edge
+            },
+            defaultStyle: {
+                font: 'Harmattan',
+                size: 25,
+                color: 'rgb(158,133,110)',
+                align: 'left',
+                lineHeight: 25,
+                shadow: {
+                    shadowColor: 'rgba(0,0,0,1)',
+                    shadowBlur: 2,
+                    shadowOffsetX: 2,
+                    shadowOffsetY: 2
+                }
+            },
+            lines: [
+                { text: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'},
+                { text: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'}
             ]
         }
     },
