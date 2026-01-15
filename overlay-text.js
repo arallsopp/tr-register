@@ -58,26 +58,23 @@ function resolveLinesWithInheritance(configLines, userText) {
 
 function drawPerspectiveText(ctx, text, style, perspective, y) {
     const {
-        leftScale = 0.7,
-        rightScale = 1,
+        increment = 1.1,
         skewX = 0,
         skewY = 0
     } = perspective;
 
     const chars = [...text];
-    const charCount = chars.length;
 
     // Measure each character once
     const baseWidths = chars.map(c =>
         ctx.measureText(c).width
     );
 
-    let x = 0;
+    let x = 0,
+        increment_at_position = 1
 
     chars.forEach((char, i) => {
-        const t = charCount === 1 ? 0 : i / (charCount - 1);
-        const scale = leftScale + t * (rightScale - leftScale);
-
+        const scale = increment_at_position;
         const charWidth = baseWidths[i] * scale;
 
         ctx.save();
@@ -87,7 +84,7 @@ function drawPerspectiveText(ctx, text, style, perspective, y) {
 
         // Apply perspective
         ctx.transform(
-            scale,      // scale X
+            0.9 * scale,      // we normally want it slightly narrower.
             skewY,      // skew Y
             skewX,      // skew X
             scale,      // scale Y
@@ -101,6 +98,7 @@ function drawPerspectiveText(ctx, text, style, perspective, y) {
 
         // Amount of ADVANCE is SCALED
         x += charWidth;
+        increment_at_position += increment;
     });
 }
 function renderTextBlock(ctx, block, userTextOverride) {

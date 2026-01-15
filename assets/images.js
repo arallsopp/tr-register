@@ -89,8 +89,7 @@ const images = {
             },
             perspective: {
                 enabled: true,
-                leftScale: 1,
-                rightScale: 0.88
+                increment: -0.005
             },
             lines: [
                 { text: "BRIAN AND LINDA'S" },
@@ -238,13 +237,12 @@ const images = {
                 skew: { x: -0.01, y: -0.09 }
             },
             perspective: {
-                    enabled: true,
-                    leftScale: 0.88,
-                    rightScale: 1.0
+                 enabled: true,
+                 increment:0.005
             },
             defaultStyle: {
                 font: 'Harmattan',
-                size: 42,
+                size: 37,
                 color: 'rgb(158,133,110)',
                 align: 'left',
                 lineHeight: 39,
@@ -269,19 +267,18 @@ const images = {
         },
         textBlock: {
             transform: {
-                position: { x: 818, y: 273 },
+                position: { x: 818, y: 274 },
                 rotate: 0,
                 scale: 1,
                 skew: { x: -0.01, y: -0.065 }
             },
             perspective: {
                 enabled: true,
-                leftScale: 0.9,
-                rightScale: 1.0
+                increment: 0.002,
             },
             defaultStyle: {
                 font: 'Harmattan',
-                size: 38,
+                size: 32,
                 color: 'rgb(236,221,195)',
                 align: 'left',
                 lineHeight: 32,
@@ -293,8 +290,8 @@ const images = {
                 }
             },
             lines: [
-                { text: 'DORSET DAY RUN       ?'},
-                { text: 'DESCRIPTION             ?' }
+                { text: 'DORSET DAY RUN     ?'},
+                { text: 'DESCRIPTION           ?' }
             ]
         }
     },
