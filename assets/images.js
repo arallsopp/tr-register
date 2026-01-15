@@ -261,6 +261,43 @@ const images = {
             ]
         }
     },
+    image9: {
+        meta: {
+            name: 'Dorset Day Run',
+            prompt: '2 lines',
+            src: 'assets/artwork/day-dorset.jpg'
+        },
+        textBlock: {
+            transform: {
+                position: { x: 818, y: 273 },
+                rotate: 0,
+                scale: 1,
+                skew: { x: -0.01, y: -0.065 }
+            },
+            perspective: {
+                enabled: true,
+                leftScale: 0.9,
+                rightScale: 1.0
+            },
+            defaultStyle: {
+                font: 'Harmattan',
+                size: 38,
+                color: 'rgb(236,221,195)',
+                align: 'left',
+                lineHeight: 32,
+                shadow: {
+                    shadowColor: 'rgba(0,0,0,1)',
+                    shadowBlur: 2,
+                    shadowOffsetX: 1,
+                    shadowOffsetY: 1
+                }
+            },
+            lines: [
+                { text: 'DORSET DAY RUN       ?'},
+                { text: 'DESCRIPTION             ?' }
+            ]
+        }
+    },
     upload: {
         meta: {
             name: 'Uploaded Image',
