@@ -277,16 +277,18 @@ const images = {
             },
             perspective: {
                     enabled: true,
-                    leftScale: 0.3,
+                    perspectiveScaleIncrement: 0.05,
+                    skewX: 0,
+                    skewY: 0,
                     rightScale: 1.0,
                     lineAnchor: 0 // far edge
             },
             defaultStyle: {
                 font: 'Harmattan',
-                size: 65,
+                size: 25,
                 color: 'rgb(158,133,110)',
                 align: 'left',
-                lineHeight: 55,
+                lineHeight: 25,
                 shadow: {
                     shadowColor: 'rgba(0,0,0,1)',
                     shadowBlur: 2,
