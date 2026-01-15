@@ -56,46 +56,31 @@ function resolveLinesWithInheritance(configLines, userText) {
     });
 }
 
-function drawPerspectiveText(ctx, text, style, perspective, y) {
-    const {
-        perspectiveScaleIncrement = 0.02, // amount to increase per character
-        skewX = 0,
-        skewY = 0
-    } = perspective;
-
+function drawPerspectiveText(ctx, text, style, perspective, lineIndex, baseTop){
+    const inc = perspective.perspectiveScaleIncrement;
+    let scale = 1;
+    let x = 0;
     const chars = [...text];
 
-    let x = 0;
-    let currentScale = 1; // starting scale
-
-    const baseWidths = chars.map(c => ctx.measureText(c).width);
-
     chars.forEach((char, i) => {
-        const charWidth = baseWidths[i] * currentScale;
+        const s = scale;
+
+        const baselineY =
+            baseTop +
+            style.size * s +
+            lineIndex * (style.lineHeight * s);
 
         ctx.save();
-        ctx.translate(x, y);
-
-        // Apply per-character scaling
-        ctx.transform(
-            currentScale,  // scale X
-            skewY,         // skew Y
-            skewX,         // skew X
-            currentScale,  // scale Y
-            0, 0
-        );
-
+        ctx.translate(x, baselineY);
+        ctx.transform(s, perspective.skewY, perspective.skewX, s, 0, 0);
         ctx.fillText(char, 0, 0);
         ctx.restore();
 
-        // advance x
-        x += charWidth;
-
-        // increment perspective
-        currentScale += perspectiveScaleIncrement;
+        x += ctx.measureText(char).width * s;
+        scale = scale * (1+perspective.perspectiveScaleIncrement);
     });
-}
 
+}
 function renderTextBlock(ctx, block, userTextOverride) {
     const { transform, defaultStyle, lines } = block;
     const blockScale = transform.scale || 1;
@@ -138,22 +123,16 @@ function renderTextBlock(ctx, block, userTextOverride) {
 
         const baselineAdjust = style.size * 0.35
         if (block.perspective?.enabled) {
-            drawPerspectiveText(ctx, line.text, style, block.perspective, (y / scale) + baselineAdjust);
-
-            // compute line advance using perspective
-            const lineChars = [...line.text];
-            let lineScale = 1;
-            for (let i = 0; i < lineChars.length; i++) {
-                lineScale += block.perspective.perspectiveScaleIncrement || 0.02;
-            }
-
-            y += style.lineHeight * lineScale * scale;
+            // fake perspective/fontsize renderer
+            drawPerspectiveText(ctx, line.text, style, block.perspective, 0,y);
         } else {
+            // normal renderer
             ctx.fillText(line.text, 0, (y / scale) + baselineAdjust);
-            y += style.lineHeight * scale;
         }
         ctx.restore();
-        y += style.lineHeight * scale;
+
+        y += style.lineHeight;
+
     });
 
     ctx.restore();
