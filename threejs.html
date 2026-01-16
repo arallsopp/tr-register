@@ -35,23 +35,55 @@
     // ================= Text Canvas =================
     const TEXT_W = 2048, TEXT_H = 512;
     const textCanvas = document.createElement("canvas");
-    textCanvas.width = TEXT_W; textCanvas.height = TEXT_H;
+    textCanvas.width = TEXT_W;
+    textCanvas.height = TEXT_H;
     const ctx = textCanvas.getContext("2d");
 
-    function drawText(t){
-        ctx.fillStyle="#fff";
-        ctx.fillRect(0,0,TEXT_W,TEXT_H);
-        ctx.fillStyle="#000";
-        ctx.font="bold 180px Arial Black,sans-serif";
-        ctx.textAlign="center";
-        ctx.textBaseline="middle";
-        ctx.fillText(t,TEXT_W/2,TEXT_H/2);
-    }
-    drawText("CANVAS PRINT");
-
+    // Create texture first
     const texture = new THREE.CanvasTexture(textCanvas);
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
+
+    // Load background image
+    const bgImage = new Image();
+    bgImage.src = "assets/artwork/evening-road-run.jpg";
+    bgImage.onload = () => drawText(document.getElementById("textInput").value);
+
+    function drawText(text){
+        // Clear canvas
+        ctx.clearRect(0,0,TEXT_W,TEXT_H);
+
+        // Draw background
+        if(bgImage.complete) {
+            ctx.drawImage(bgImage, 0, 0, TEXT_W, TEXT_H);
+        } else {
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(0,0,TEXT_W,TEXT_H);
+        }
+
+        // Draw multi-line text
+        const lines = text.split("\n");
+        ctx.fillStyle = "#000";
+        ctx.font = "bold 100px Arial Black,sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        const lineHeight = 120; // spacing between lines
+        const totalHeight = lineHeight * lines.length;
+        let y = TEXT_H/2 - totalHeight/2 + lineHeight/2;
+
+        for(let line of lines){
+            ctx.fillText(line, TEXT_W/2, y);
+            y += lineHeight;
+        }
+
+        // Update texture after drawing
+        texture.needsUpdate = true;
+    }
+
+    // Initial draw (if bg image is already loaded, or will wait for onload)
+    drawText("CANVAS PRINT");
+
 
     // ================= Plane Geometry =================
     const PLANE_W = 800, PLANE_H = 200;
@@ -176,6 +208,7 @@
     // ================= Editable text =================
     document.getElementById("textInput").addEventListener("input",e=>{
         drawText(e.target.value);
+        console.log(`updated text to ${e.target.value}`);
         texture.needsUpdate = true;
     });
 
