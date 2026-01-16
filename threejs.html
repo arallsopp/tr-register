@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Planar Quad Warp</title>
+    <title>Text Warp Over Background</title>
     <style>
         body { margin:0; overflow:hidden; background:#eee; font-family:sans-serif; }
         #ui {
@@ -10,18 +10,20 @@
             top:10px; left:10px;
             background:white; padding:10px; border-radius:6px;
         }
+        #textInput { width:200px; height:80px; }
     </style>
 </head>
 <body>
+
 <div id="ui">
-    <textarea id="textInput">CANVAS PRINT</textarea>
+    <textarea id="textInput">CANVAS\nPRINT</textarea>
     <div style="font-size:12px;">Drag red corners</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
 
 <script>
-    // ================= Scene & Camera =================
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(-500,500,300,-300,1,2000);
     camera.position.z = 1000;
@@ -29,70 +31,61 @@
     const renderer = new THREE.WebGLRenderer({antialias:true});
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setClearColor(0x000000,0); // transparent
     document.body.appendChild(renderer.domElement);
 
-    // ================= Text Canvas =================
-    const TEXT_W = 2048, TEXT_H = 512;
+    // -------------------- Background Image --------------------
+    const bgTexture = new THREE.TextureLoader().load('assets/artwork/evening-road-run.jpg');
+    const bgGeometry = new THREE.PlaneGeometry(1000, 600);
+    const bgMaterial = new THREE.MeshBasicMaterial({ map: bgTexture });
+    const bgMesh = new THREE.Mesh(bgGeometry, bgMaterial);
+    bgMesh.position.z = -1; // behind text
+    scene.add(bgMesh);
+
+    // -------------------- Text Canvas --------------------
+    const TEXT_W = 1024, TEXT_H = 256;
     const textCanvas = document.createElement("canvas");
     textCanvas.width = TEXT_W;
     textCanvas.height = TEXT_H;
     const ctx = textCanvas.getContext("2d");
 
-    // Create texture first
-    const texture = new THREE.CanvasTexture(textCanvas);
-    texture.minFilter = THREE.LinearFilter;
-    texture.magFilter = THREE.LinearFilter;
+    const textTexture = new THREE.CanvasTexture(textCanvas);
+    textTexture.minFilter = THREE.LinearFilter;
+    textTexture.magFilter = THREE.LinearFilter;
 
-    // Load background image
-    const bgImage = new Image();
-    bgImage.src = "assets/artwork/evening-road-run.jpg";
-    bgImage.onload = () => drawText(document.getElementById("textInput").value);
-
-    function drawText(text){
-        // Clear canvas
+    function drawText(text) {
         ctx.clearRect(0,0,TEXT_W,TEXT_H);
 
-        // Draw background
-        if(bgImage.complete) {
-            ctx.drawImage(bgImage, 0, 0, TEXT_W, TEXT_H);
-        } else {
-            ctx.fillStyle = "#fff";
-            ctx.fillRect(0,0,TEXT_W,TEXT_H);
-        }
+        // transparent background
+        ctx.fillStyle = "rgba(0,0,0,0)";
+        ctx.fillRect(0,0,TEXT_W,TEXT_H);
 
-        // Draw multi-line text
+        // draw multi-line text
         const lines = text.split("\n");
         ctx.fillStyle = "#000";
         ctx.font = "bold 100px Arial Black,sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-
-        const lineHeight = 120; // spacing between lines
-        const totalHeight = lineHeight * lines.length;
+        const lineHeight = 120;
+        const totalHeight = lines.length * lineHeight;
         let y = TEXT_H/2 - totalHeight/2 + lineHeight/2;
-
-        for(let line of lines){
+        for (let line of lines) {
             ctx.fillText(line, TEXT_W/2, y);
             y += lineHeight;
         }
 
-        // Update texture after drawing
-        texture.needsUpdate = true;
+        textTexture.needsUpdate = true;
     }
 
-    // Initial draw (if bg image is already loaded, or will wait for onload)
-    drawText("CANVAS PRINT");
+    // initial draw
+    drawText(document.getElementById("textInput").value);
 
-
-    // ================= Plane Geometry =================
+    // -------------------- Distorted Text Plane --------------------
     const PLANE_W = 800, PLANE_H = 200;
     const geometry = new THREE.PlaneGeometry(PLANE_W, PLANE_H,1,1);
 
-    // ================= Shader Material =================
     const material = new THREE.ShaderMaterial({
         uniforms: {
-            map: { value: texture },
+            map: { value: textTexture },
             Hinv: { value: new THREE.Matrix3() }
         },
         vertexShader: `
@@ -119,7 +112,7 @@
     const mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
 
-    // ================= Corner Handles =================
+    // -------------------- Corner Handles --------------------
     const corners = [
         new THREE.Vector2(-PLANE_W/2, PLANE_H/2),  // TL
         new THREE.Vector2( PLANE_W/2, PLANE_H/2),  // TR
@@ -139,49 +132,37 @@
         handles.push(h);
     });
 
-    // ================= Homography Calculation =================
+    // -------------------- Homography --------------------
     function computeHomography(src,dst){
-        // src and dst: [{x,y},...] TL,TR,BR,BL
-        const X = [];
-        const Y = [];
+        const X = [], Y=[];
         for(let i=0;i<4;i++){
-            const xs = src[i].x, ys = src[i].y;
-            const xd = dst[i].x, yd = dst[i].y;
+            const xs=src[i].x,ys=src[i].y;
+            const xd=dst[i].x,yd=dst[i].y;
             X.push([xs,ys,1,0,0,0,-xs*xd,-ys*xd]);
             X.push([0,0,0,xs,ys,1,-xs*yd,-ys*yd]);
             Y.push(xd); Y.push(yd);
         }
-        // Solve Xh=Y
-        // Using manual Cramer's rule for 8x8 is tedious; simpler: small linear solve
-        const h = numeric.solve(X,Y); // numeric.js required
-        h.push(1); // last element
+        const h = numeric.solve(X,Y);
+        h.push(1);
         const H = new THREE.Matrix3();
         H.set(h[0],h[1],h[2],h[3],h[4],h[5],h[6],h[7],h[8]);
         return H;
     }
 
-    // ================= Update Homography =================
     function updateHomography(){
-        const srcQuad = [
-            {x:0,y:1}, {x:1,y:1}, {x:1,y:0}, {x:0,y:0} // UV space
-        ];
-        const dstQuad = corners.map(c=>({
-            x: (c.x+PLANE_W/2)/PLANE_W,
-            y: (c.y+PLANE_H/2)/PLANE_H
-        }));
-        // H: UV -> quad
+        const srcQuad = [{x:0,y:1},{x:1,y:1},{x:1,y:0},{x:0,y:0}];
+        const dstQuad = corners.map(c=>({x:(c.x+PLANE_W/2)/PLANE_W,y:(c.y+PLANE_H/2)/PLANE_H}));
         const H = computeHomography(srcQuad,dstQuad);
-        // Invert H for shader: quad -> UV
         H.invert();
         material.uniforms.Hinv.value.copy(H);
     }
 
-    // ================= Dragging =================
+    // -------------------- Dragging --------------------
     const raycaster = new THREE.Raycaster();
     const mouse = new THREE.Vector2();
     let active=null;
 
-    window.addEventListener("mousedown",e=>{
+    window.addEventListener("mousedown", e=>{
         mouse.x=(e.clientX/window.innerWidth)*2-1;
         mouse.y=-(e.clientY/window.innerHeight)*2+1;
         raycaster.setFromCamera(mouse,camera);
@@ -189,7 +170,7 @@
         if(hit.length) active = hit[0].object;
     });
 
-    window.addEventListener("mousemove",e=>{
+    window.addEventListener("mousemove", e=>{
         if(!active) return;
         mouse.x=(e.clientX/window.innerWidth)*2-1;
         mouse.y=-(e.clientY/window.innerHeight)*2+1;
@@ -205,22 +186,18 @@
 
     window.addEventListener("mouseup",()=>active=null);
 
-    // ================= Editable text =================
-    document.getElementById("textInput").addEventListener("input",e=>{
+    // -------------------- Editable Text --------------------
+    document.getElementById("textInput").addEventListener("input", e=>{
         drawText(e.target.value);
-        console.log(`updated text to ${e.target.value}`);
-        texture.needsUpdate = true;
     });
 
-    // ================= Animation =================
+    // -------------------- Animation --------------------
+    updateHomography();
     (function animate(){
         requestAnimationFrame(animate);
         renderer.render(scene,camera);
     })();
 </script>
-
-<!-- include numeric.js for 8x8 linear solve -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
 
 </body>
 </html>
