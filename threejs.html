@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Projective Quad Warp</title>
+    <title>Planar Quad Warp</title>
     <style>
         body { margin:0; overflow:hidden; background:#eee; font-family:sans-serif; }
         #ui {
@@ -19,12 +19,14 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+
 <script>
     // ================= Scene & Camera =================
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xf0f0f0);
     const camera = new THREE.OrthographicCamera(-500,500,300,-300,1,2000);
     camera.position.z = 1000;
+
     const renderer = new THREE.WebGLRenderer({antialias:true});
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -35,14 +37,18 @@
     const textCanvas = document.createElement("canvas");
     textCanvas.width = TEXT_W; textCanvas.height = TEXT_H;
     const ctx = textCanvas.getContext("2d");
+
     function drawText(t){
-        ctx.fillStyle="#fff"; ctx.fillRect(0,0,TEXT_W,TEXT_H);
+        ctx.fillStyle="#fff";
+        ctx.fillRect(0,0,TEXT_W,TEXT_H);
         ctx.fillStyle="#000";
         ctx.font="bold 180px Arial Black,sans-serif";
-        ctx.textAlign="center"; ctx.textBaseline="middle";
+        ctx.textAlign="center";
+        ctx.textBaseline="middle";
         ctx.fillText(t,TEXT_W/2,TEXT_H/2);
     }
     drawText("CANVAS PRINT");
+
     const texture = new THREE.CanvasTexture(textCanvas);
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
@@ -53,23 +59,26 @@
 
     // ================= Shader Material =================
     const material = new THREE.ShaderMaterial({
-        uniforms: { map:{value:texture}, H:{value:new THREE.Matrix3()} },
-        vertexShader:`
+        uniforms: {
+            map: { value: texture },
+            Hinv: { value: new THREE.Matrix3() }
+        },
+        vertexShader: `
     varying vec2 vUv;
     void main(){
       vUv = uv;
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
     }
   `,
-        fragmentShader:`
+        fragmentShader: `
     uniform sampler2D map;
-    uniform mat3 H;
+    uniform mat3 Hinv;
     varying vec2 vUv;
     void main(){
-      vec3 p = H * vec3(vUv,1.0);
+      vec3 p = Hinv * vec3(vUv,1.0);
       vec2 uv = p.xy / p.z;
       if(uv.x<0.0||uv.x>1.0||uv.y<0.0||uv.y>1.0) discard;
-      gl_FragColor = texture2D(map,uv);
+      gl_FragColor = texture2D(map, uv);
     }
   `,
         transparent:true
@@ -78,17 +87,18 @@
     const mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
 
-    // ================= Corner handles =================
+    // ================= Corner Handles =================
     const corners = [
-        new THREE.Vector2(-PLANE_W/2, PLANE_H/2),   // TL
-        new THREE.Vector2( PLANE_W/2, PLANE_H/2),   // TR
-        new THREE.Vector2( PLANE_W/2, -PLANE_H/2),  // BR
-        new THREE.Vector2(-PLANE_W/2, -PLANE_H/2)   // BL
+        new THREE.Vector2(-PLANE_W/2, PLANE_H/2),  // TL
+        new THREE.Vector2( PLANE_W/2, PLANE_H/2),  // TR
+        new THREE.Vector2( PLANE_W/2,-PLANE_H/2),  // BR
+        new THREE.Vector2(-PLANE_W/2,-PLANE_H/2)   // BL
     ];
 
     const handleGeo = new THREE.CircleGeometry(8,16);
     const handleMat = new THREE.MeshBasicMaterial({color:0xff0000});
     const handles = [];
+
     corners.forEach((c,i)=>{
         const h = new THREE.Mesh(handleGeo,handleMat);
         h.position.set(c.x,c.y,1);
@@ -97,64 +107,42 @@
         handles.push(h);
     });
 
-    // ================= Homography Math =================
-    // Maps rect UV corners -> dragged quad corners
+    // ================= Homography Calculation =================
     function computeHomography(src,dst){
-        // src and dst: [{x,y}, ...] TL,TR,BR,BL
-        const A=[];
+        // src and dst: [{x,y},...] TL,TR,BR,BL
+        const X = [];
+        const Y = [];
         for(let i=0;i<4;i++){
-            const xs=src[i].x, ys=src[i].y;
-            const xd=dst[i].x, yd=dst[i].y;
-            A.push([xs,ys,1,0,0,0,-xd*xs,-xd*ys,-xd]);
-            A.push([0,0,0,xs,ys,1,-yd*xs,-yd*ys,-yd]);
+            const xs = src[i].x, ys = src[i].y;
+            const xd = dst[i].x, yd = dst[i].y;
+            X.push([xs,ys,1,0,0,0,-xs*xd,-ys*xd]);
+            X.push([0,0,0,xs,ys,1,-xs*yd,-ys*yd]);
+            Y.push(xd); Y.push(yd);
         }
-        // Solve Ah=0 using simple linear solver (SVD would be more robust)
-        const math = window.numeric || null;
-        if(!math) console.warn("Better: include numeric.js for exact solve");
-        const h=[1,0,0,0,1,0,0,0,1]; // fallback identity
+        // Solve Xh=Y
+        // Using manual Cramer's rule for 8x8 is tedious; simpler: small linear solve
+        const h = numeric.solve(X,Y); // numeric.js required
+        h.push(1); // last element
         const H = new THREE.Matrix3();
         H.set(h[0],h[1],h[2],h[3],h[4],h[5],h[6],h[7],h[8]);
         return H;
     }
 
-    // Our UV rectangle
-    const srcQuad = [
-        {x:0,y:1},{x:1,y:1},{x:1,y:0},{x:0,y:0}
-    ];
-
     // ================= Update Homography =================
     function updateHomography(){
-        const dstQuad = corners.map(c=>({x:c.x/PLANE_W+0.5,y:1-(c.y/PLANE_H+0.5)}));
-        // We'll compute exact homography using a small utility below
-        const H = getHomography(srcQuad,dstQuad);
-        material.uniforms.H.value.copy(H);
+        const srcQuad = [
+            {x:0,y:1}, {x:1,y:1}, {x:1,y:0}, {x:0,y:0} // UV space
+        ];
+        const dstQuad = corners.map(c=>({
+            x: (c.x+PLANE_W/2)/PLANE_W,
+            y: (c.y+PLANE_H/2)/PLANE_H
+        }));
+        // H: UV -> quad
+        const H = computeHomography(srcQuad,dstQuad);
+        // Invert H for shader: quad -> UV
+        H.invert();
+        material.uniforms.Hinv.value.copy(H);
     }
-
-    // ================= Simple 3x3 homography solver =================
-    // https://stackoverflow.com/a/29643673
-    function getHomography(src,dst){
-        const x0=src[0].x, y0=src[0].y, x1=src[1].x, y1=src[1].y;
-        const x2=src[2].x, y2=src[2].y, x3=src[3].x, y3=src[3].y;
-        const u0=dst[0].x, v0=dst[0].y, u1=dst[1].x, v1=dst[1].y;
-        const u2=dst[2].x, v2=dst[2].y, u3=dst[3].x, v3=dst[3].y;
-
-        const dx1=x1-x2, dx2=x3-x2, dx3=x0-x1+x2-x3;
-        const dy1=y1-y2, dy2=y3-y2, dy3=y0-y1+y2-y3;
-        const du1=u1-u2, du2=u3-u2, du3=u0-u1+u2-u3;
-        const dv1=v1-v2, dv2=v3-v2, dv3=v0-v1+v2-v3;
-
-        const a = (du3*(dy1)-dv3*(dx1))/(dx1*dy2 - dx2*dy1);
-        const b = (dv3*(dx2)-du3*(dy2))/(dx1*dy2 - dx2*dy1);
-        const H = new THREE.Matrix3();
-        H.set(
-            u1-u0+a*u1, u0, 0,
-            v1-v0+b*v1, v0, 0,
-            a, b, 1
-        );
-        return H;
-    }
-
-    updateHomography();
 
     // ================= Dragging =================
     const raycaster = new THREE.Raycaster();
@@ -165,8 +153,8 @@
         mouse.x=(e.clientX/window.innerWidth)*2-1;
         mouse.y=-(e.clientY/window.innerHeight)*2+1;
         raycaster.setFromCamera(mouse,camera);
-        const hit=raycaster.intersectObjects(handles);
-        if(hit.length) active=hit[0].object;
+        const hit = raycaster.intersectObjects(handles);
+        if(hit.length) active = hit[0].object;
     });
 
     window.addEventListener("mousemove",e=>{
@@ -177,7 +165,7 @@
         const plane = new THREE.Plane(new THREE.Vector3(0,0,1),0);
         const p = new THREE.Vector3();
         raycaster.ray.intersectPlane(plane,p);
-        const i=active.userData.index;
+        const i = active.userData.index;
         corners[i].set(p.x,p.y);
         active.position.set(p.x,p.y,1);
         updateHomography();
@@ -191,11 +179,15 @@
         texture.needsUpdate = true;
     });
 
-    // ================= Render =================
+    // ================= Animation =================
     (function animate(){
         requestAnimationFrame(animate);
         renderer.render(scene,camera);
     })();
 </script>
+
+<!-- include numeric.js for 8x8 linear solve -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
+
 </body>
 </html>
