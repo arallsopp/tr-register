@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Three.js Quad Warp Text</title>
+    <style>
+        body { margin: 0; background: #eee; font-family: sans-serif; }
+        #ui {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+        }
+        input { width: 200px; }
+    </style>
+</head>
+<body>
+
+<div id="ui">
+    <div>
+        <label>Text:</label><br />
+        <input id="textInput" value="CANVAS PRINT" />
+    </div>
+    <small>Drag corners with mouse</small>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
+
+<script>
+    /* ===============================
+       Scene setup
+    ================================ */
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf0f0f0);
+
+    const camera = new THREE.OrthographicCamera(
+        -500, 500, 300, -300, 1, 2000
+    );
+    camera.position.z = 1000;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    document.body.appendChild(renderer.domElement);
+
+    /* ===============================
+       Text canvas (print-quality)
+    ================================ */
+    const TEXT_W = 2048;
+    const TEXT_H = 512;
+
+    const textCanvas = document.createElement("canvas");
+    textCanvas.width = TEXT_W;
+    textCanvas.height = TEXT_H;
+
+    const textCtx = textCanvas.getContext("2d");
+
+    function drawText(text) {
+        textCtx.clearRect(0, 0, TEXT_W, TEXT_H);
+        textCtx.fillStyle = "#fff";
+        textCtx.fillRect(0, 0, TEXT_W, TEXT_H);
+
+        textCtx.fillStyle = "#000";
+        textCtx.font = "bold 180px Arial Black, sans-serif";
+        textCtx.textAlign = "center";
+        textCtx.textBaseline = "middle";
+        textCtx.fillText(text, TEXT_W / 2, TEXT_H / 2);
+    }
+
+    drawText("CANVAS PRINT");
+
+    const texture = new THREE.CanvasTexture(textCanvas);
+    texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+
+    /* ===============================
+       Warped plane
+    ================================ */
+    const geometry = new THREE.PlaneGeometry(800, 200, 1, 1);
+    const material = new THREE.MeshBasicMaterial({ map: texture });
+    const plane = new THREE.Mesh(geometry, material);
+    scene.add(plane);
+
+    /* ===============================
+       Corner handles
+    ================================ */
+    const corners = [
+        new THREE.Vector3(-400, 100, 0),
+        new THREE.Vector3( 400, 100, 0),
+        new THREE.Vector3( 400,-100, 0),
+        new THREE.Vector3(-400,-100, 0)
+    ];
+
+    function updateGeometry() {
+        const pos = geometry.attributes.position;
+        for (let i = 0; i < 4; i++) {
+            pos.setXYZ(i, corners[i].x, corners[i].y, 0);
+        }
+        pos.needsUpdate = true;
+    }
+
+    updateGeometry();
+
+    /* ===============================
+       Drag interaction
+    ================================ */
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+    let dragging = null;
+
+    window.addEventListener("mousedown", e => {
+        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+
+        corners.forEach((c, i) => {
+            const dist = raycaster.ray.distanceToPoint(c);
+            if (dist < 20) dragging = i;
+        });
+    });
+
+    window.addEventListener("mousemove", e => {
+        if (dragging === null) return;
+
+        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+
+        const planeZ = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+        const hit = new THREE.Vector3();
+        raycaster.ray.intersectPlane(planeZ, hit);
+
+        corners[dragging].copy(hit);
+        updateGeometry();
+    });
+
+    window.addEventListener("mouseup", () => dragging = null);
+
+    /* ===============================
+       Editable text
+    ================================ */
+    document.getElementById("textInput").addEventListener("input", e => {
+        drawText(e.target.value);
+        texture.needsUpdate = true;
+    });
+
+    /* ===============================
+       Render loop
+    ================================ */
+    function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+    }
+    animate();
+</script>
+
+</body>
+</html>
