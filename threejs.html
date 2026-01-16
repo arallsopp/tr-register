@@ -14,7 +14,7 @@
 </head>
 <body>
 <div id="ui">
-    <input id="textInput" value="CANVAS PRINT">
+    <textarea id="textInput">CANVAS PRINT</textarea>
     <div style="font-size:12px;">Drag red corners</div>
 </div>
 
@@ -23,13 +23,13 @@
 <script>
     // ================= Scene & Camera =================
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xf0f0f0);
     const camera = new THREE.OrthographicCamera(-500,500,300,-300,1,2000);
     camera.position.z = 1000;
 
     const renderer = new THREE.WebGLRenderer({antialias:true});
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setClearColor(0x000000,0); // transparent
     document.body.appendChild(renderer.domElement);
 
     // ================= Text Canvas =================
