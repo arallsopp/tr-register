@@ -25,6 +25,9 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 
 <script>
+    const PLANE_W = 800;
+    const PLANE_H = 200;
+
     /* =====================================================
        Scene
     ===================================================== */
@@ -130,7 +133,7 @@
        Quad
     ===================================================== */
     const quad = new THREE.Mesh(
-        new THREE.PlaneGeometry(800,200),
+        new THREE.PlaneGeometry(PLANE_W, PLANE_H),
         material
     );
     scene.add(quad);
@@ -143,16 +146,16 @@
     const handles = [];
 
     const handlePositions = [
-        new THREE.Vector3(-400, 100, 1),
-        new THREE.Vector3( 400, 100, 1),
-        new THREE.Vector3( 400,-100, 1),
-        new THREE.Vector3(-400,-100, 1)
+        new THREE.Vector3(-PLANE_W/2,  PLANE_H/2, 0),
+        new THREE.Vector3( PLANE_W/2,  PLANE_H/2, 0),
+        new THREE.Vector3( PLANE_W/2, -PLANE_H/2, 0),
+        new THREE.Vector3(-PLANE_W/2, -PLANE_H/2, 0)
     ];
 
-    handlePositions.forEach(p=>{
-        const h=new THREE.Mesh(handleGeo,handleMat);
+    handlePositions.forEach(p => {
+        const h = new THREE.Mesh(handleGeo, handleMat);
         h.position.copy(p);
-        scene.add(h);
+        quad.add(h);              //<-- parent to quad
         handles.push(h);
     });
 
@@ -163,15 +166,21 @@
         {x:0,y:0},{x:1,y:0},{x:1,y:1},{x:0,y:1}
     ];
 
-    function updateHomography(){
-        const dst = handles.map(h=>({
-            x:(h.position.x+400)/800,
-            y:(100-h.position.y)/200
+    function updateHomography() {
+        const dst = handles.map(h => ({
+            x: (h.position.x + PLANE_W / 2) / PLANE_W,
+            y: 1.0 - (h.position.y + PLANE_H / 2) / PLANE_H
         }));
-        material.uniforms.H.value.fromArray(
-            computeHomography(srcQuad,dst)
-        );
+
+        const HsrcToDst = computeHomography(srcQuad, dst);
+
+        // 🔑 INVERT THE HOMOGRAPHY
+        const H = new THREE.Matrix3().fromArray(HsrcToDst);
+        H.invert();
+
+        material.uniforms.H.value.copy(H);
     }
+
     updateHomography();
 
     /* =====================================================
@@ -189,17 +198,23 @@
         if(hit.length) active=hit[0].object;
     });
 
-    window.addEventListener("mousemove",e=>{
-        if(!active) return;
-        mouse.x=(e.clientX/window.innerWidth)*2-1;
-        mouse.y=-(e.clientY/window.innerHeight)*2+1;
-        raycaster.setFromCamera(mouse,camera);
-        const plane=new THREE.Plane(new THREE.Vector3(0,0,1),0);
-        const p=new THREE.Vector3();
-        raycaster.ray.intersectPlane(plane,p);
-        active.position.copy(p);
+    window.addEventListener("mousemove", e => {
+        if (!active) return;
+
+        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+        raycaster.setFromCamera(mouse, camera);
+
+        const plane = new THREE.Plane(new THREE.Vector3(0,0,1), 0);
+        const hit = new THREE.Vector3();
+        raycaster.ray.intersectPlane(plane, hit);
+
+        quad.worldToLocal(hit);     // <-- convert to plane-local space
+        active.position.copy(hit);
+
         updateHomography();
     });
+
 
     window.addEventListener("mouseup",()=>active=null);
 
