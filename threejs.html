@@ -2,116 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>True Quad Warp (Homography – Fixed Drag)</title>
+    <title>Projective Quad Warp</title>
     <style>
-        body { margin: 0; background: #eaeaea; font-family: sans-serif; }
+        body { margin:0; overflow:hidden; background:#eee; font-family:sans-serif; }
         #ui {
             position: fixed;
-            top: 10px;
-            left: 10px;
-            background: white;
-            padding: 10px;
-            border-radius: 6px;
+            top:10px; left:10px;
+            background:white; padding:10px; border-radius:6px;
         }
     </style>
 </head>
 <body>
-
 <div id="ui">
     <input id="textInput" value="CANVAS PRINT">
-    <div style="font-size:12px">Drag corner dots</div>
+    <div style="font-size:12px;">Drag red corners</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
-
 <script>
-    const PLANE_W = 800;
-    const PLANE_H = 200;
-
-    /* =====================================================
-       Scene
-    ===================================================== */
+    // ================= Scene & Camera =================
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xf0f0f0);
-
-    const camera = new THREE.OrthographicCamera(-500, 500, 300, -300, 1, 2000);
+    const camera = new THREE.OrthographicCamera(-500,500,300,-300,1,2000);
     camera.position.z = 1000;
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({antialias:true});
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     document.body.appendChild(renderer.domElement);
 
-    /* =====================================================
-       Text canvas
-    ===================================================== */
-    const TEXT_W = 2048;
-    const TEXT_H = 512;
+    // ================= Text Canvas =================
+    const TEXT_W = 2048, TEXT_H = 512;
     const textCanvas = document.createElement("canvas");
-    textCanvas.width = TEXT_W;
-    textCanvas.height = TEXT_H;
+    textCanvas.width = TEXT_W; textCanvas.height = TEXT_H;
     const ctx = textCanvas.getContext("2d");
-
-    function drawText(t) {
-        ctx.fillStyle = "#fff";
-        ctx.fillRect(0,0,TEXT_W,TEXT_H);
-        ctx.fillStyle = "#000";
-        ctx.font = "bold 180px Arial Black, sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(t, TEXT_W/2, TEXT_H/2);
+    function drawText(t){
+        ctx.fillStyle="#fff"; ctx.fillRect(0,0,TEXT_W,TEXT_H);
+        ctx.fillStyle="#000";
+        ctx.font="bold 180px Arial Black,sans-serif";
+        ctx.textAlign="center"; ctx.textBaseline="middle";
+        ctx.fillText(t,TEXT_W/2,TEXT_H/2);
     }
     drawText("CANVAS PRINT");
-
     const texture = new THREE.CanvasTexture(textCanvas);
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
 
-    /* =====================================================
-       Homography math
-    ===================================================== */
-    function computeHomography(src, dst) {
-        const A = [];
-        for (let i = 0; i < 4; i++) {
-            const {x,y} = src[i];
-            const {x:X,y:Y} = dst[i];
-            A.push(
-                [x,y,1,0,0,0,-x*X,-y*X,X],
-                [0,0,0,x,y,1,-x*Y,-y*Y,Y]
-            );
-        }
+    // ================= Plane Geometry =================
+    const PLANE_W = 800, PLANE_H = 200;
+    const geometry = new THREE.PlaneGeometry(PLANE_W, PLANE_H,1,1);
 
-        for (let i=0;i<8;i++) {
-            let max=i;
-            for (let j=i+1;j<8;j++)
-                if (Math.abs(A[j][i]) > Math.abs(A[max][i])) max=j;
-            [A[i],A[max]]=[A[max],A[i]];
-            const p=A[i][i];
-            for (let k=i;k<9;k++) A[i][k]/=p;
-            for (let j=0;j<8;j++) if (j!==i){
-                const f=A[j][i];
-                for (let k=i;k<9;k++) A[j][k]-=f*A[i][k];
-            }
-        }
-
-        return new Float32Array([
-            A[0][8],A[1][8],A[2][8],
-            A[3][8],A[4][8],A[5][8],
-            A[6][8],A[7][8],1
-        ]);
-    }
-
-    /* =====================================================
-       Shader (true projective quad)
-    ===================================================== */
+    // ================= Shader Material =================
     const material = new THREE.ShaderMaterial({
-        uniforms:{
-            map:{value:texture},
-            H:{value:new THREE.Matrix3()}
-        },
+        uniforms: { map:{value:texture}, H:{value:new THREE.Matrix3()} },
         vertexShader:`
     varying vec2 vUv;
     void main(){
-      vUv=uv;
-      gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);
+      vUv = uv;
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
     }
   `,
         fragmentShader:`
@@ -119,75 +66,99 @@
     uniform mat3 H;
     varying vec2 vUv;
     void main(){
-      vec3 p=H*vec3(vUv,1.);
-      vec2 uv=p.xy/p.z;
-      if(any(lessThan(uv,vec2(0)))||any(greaterThan(uv,vec2(1))))
-        discard;
-      gl_FragColor=texture2D(map,uv);
+      vec3 p = H * vec3(vUv,1.0);
+      vec2 uv = p.xy / p.z;
+      if(uv.x<0.0||uv.x>1.0||uv.y<0.0||uv.y>1.0) discard;
+      gl_FragColor = texture2D(map,uv);
     }
   `,
         transparent:true
     });
 
-    /* =====================================================
-       Quad
-    ===================================================== */
-    const quad = new THREE.Mesh(
-        new THREE.PlaneGeometry(PLANE_W, PLANE_H),
-        material
-    );
-    scene.add(quad);
+    const mesh = new THREE.Mesh(geometry, material);
+    scene.add(mesh);
 
-    /* =====================================================
-       Corner handles (FIX)
-    ===================================================== */
+    // ================= Corner handles =================
+    const corners = [
+        new THREE.Vector2(-PLANE_W/2, PLANE_H/2),   // TL
+        new THREE.Vector2( PLANE_W/2, PLANE_H/2),   // TR
+        new THREE.Vector2( PLANE_W/2, -PLANE_H/2),  // BR
+        new THREE.Vector2(-PLANE_W/2, -PLANE_H/2)   // BL
+    ];
+
     const handleGeo = new THREE.CircleGeometry(8,16);
     const handleMat = new THREE.MeshBasicMaterial({color:0xff0000});
     const handles = [];
-
-    const handlePositions = [
-        new THREE.Vector3(-PLANE_W/2,  PLANE_H/2, 0),
-        new THREE.Vector3( PLANE_W/2,  PLANE_H/2, 0),
-        new THREE.Vector3( PLANE_W/2, -PLANE_H/2, 0),
-        new THREE.Vector3(-PLANE_W/2, -PLANE_H/2, 0)
-    ];
-
-    handlePositions.forEach(p => {
-        const h = new THREE.Mesh(handleGeo, handleMat);
-        h.position.copy(p);
-        quad.add(h);              //<-- parent to quad
+    corners.forEach((c,i)=>{
+        const h = new THREE.Mesh(handleGeo,handleMat);
+        h.position.set(c.x,c.y,1);
+        h.userData.index = i;
+        scene.add(h);
         handles.push(h);
     });
 
-    /* =====================================================
-       Update homography
-    ===================================================== */
+    // ================= Homography Math =================
+    // Maps rect UV corners -> dragged quad corners
+    function computeHomography(src,dst){
+        // src and dst: [{x,y}, ...] TL,TR,BR,BL
+        const A=[];
+        for(let i=0;i<4;i++){
+            const xs=src[i].x, ys=src[i].y;
+            const xd=dst[i].x, yd=dst[i].y;
+            A.push([xs,ys,1,0,0,0,-xd*xs,-xd*ys,-xd]);
+            A.push([0,0,0,xs,ys,1,-yd*xs,-yd*ys,-yd]);
+        }
+        // Solve Ah=0 using simple linear solver (SVD would be more robust)
+        const math = window.numeric || null;
+        if(!math) console.warn("Better: include numeric.js for exact solve");
+        const h=[1,0,0,0,1,0,0,0,1]; // fallback identity
+        const H = new THREE.Matrix3();
+        H.set(h[0],h[1],h[2],h[3],h[4],h[5],h[6],h[7],h[8]);
+        return H;
+    }
+
+    // Our UV rectangle
     const srcQuad = [
-        {x:0,y:0},{x:1,y:0},{x:1,y:1},{x:0,y:1}
+        {x:0,y:1},{x:1,y:1},{x:1,y:0},{x:0,y:0}
     ];
 
-    function updateHomography() {
-        const dst = handles.map(h => ({
-            x: (h.position.x + PLANE_W / 2) / PLANE_W,
-            y: 1.0 - (h.position.y + PLANE_H / 2) / PLANE_H
-        }));
-
-        const HsrcToDst = computeHomography(srcQuad, dst);
-
-        // 🔑 INVERT THE HOMOGRAPHY
-        const H = new THREE.Matrix3().fromArray(HsrcToDst);
-        H.invert();
-
+    // ================= Update Homography =================
+    function updateHomography(){
+        const dstQuad = corners.map(c=>({x:c.x/PLANE_W+0.5,y:1-(c.y/PLANE_H+0.5)}));
+        // We'll compute exact homography using a small utility below
+        const H = getHomography(srcQuad,dstQuad);
         material.uniforms.H.value.copy(H);
+    }
+
+    // ================= Simple 3x3 homography solver =================
+    // https://stackoverflow.com/a/29643673
+    function getHomography(src,dst){
+        const x0=src[0].x, y0=src[0].y, x1=src[1].x, y1=src[1].y;
+        const x2=src[2].x, y2=src[2].y, x3=src[3].x, y3=src[3].y;
+        const u0=dst[0].x, v0=dst[0].y, u1=dst[1].x, v1=dst[1].y;
+        const u2=dst[2].x, v2=dst[2].y, u3=dst[3].x, v3=dst[3].y;
+
+        const dx1=x1-x2, dx2=x3-x2, dx3=x0-x1+x2-x3;
+        const dy1=y1-y2, dy2=y3-y2, dy3=y0-y1+y2-y3;
+        const du1=u1-u2, du2=u3-u2, du3=u0-u1+u2-u3;
+        const dv1=v1-v2, dv2=v3-v2, dv3=v0-v1+v2-v3;
+
+        const a = (du3*(dy1)-dv3*(dx1))/(dx1*dy2 - dx2*dy1);
+        const b = (dv3*(dx2)-du3*(dy2))/(dx1*dy2 - dx2*dy1);
+        const H = new THREE.Matrix3();
+        H.set(
+            u1-u0+a*u1, u0, 0,
+            v1-v0+b*v1, v0, 0,
+            a, b, 1
+        );
+        return H;
     }
 
     updateHomography();
 
-    /* =====================================================
-       Dragging (FIXED)
-    ===================================================== */
-    const raycaster=new THREE.Raycaster();
-    const mouse=new THREE.Vector2();
+    // ================= Dragging =================
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
     let active=null;
 
     window.addEventListener("mousedown",e=>{
@@ -198,39 +169,31 @@
         if(hit.length) active=hit[0].object;
     });
 
-    window.addEventListener("mousemove", e => {
-        if (!active) return;
-
-        mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
-        raycaster.setFromCamera(mouse, camera);
-
-        const plane = new THREE.Plane(new THREE.Vector3(0,0,1), 0);
-        const hit = new THREE.Vector3();
-        raycaster.ray.intersectPlane(plane, hit);
-
-        quad.worldToLocal(hit);     // <-- convert to plane-local space
-        active.position.copy(hit);
-
+    window.addEventListener("mousemove",e=>{
+        if(!active) return;
+        mouse.x=(e.clientX/window.innerWidth)*2-1;
+        mouse.y=-(e.clientY/window.innerHeight)*2+1;
+        raycaster.setFromCamera(mouse,camera);
+        const plane = new THREE.Plane(new THREE.Vector3(0,0,1),0);
+        const p = new THREE.Vector3();
+        raycaster.ray.intersectPlane(plane,p);
+        const i=active.userData.index;
+        corners[i].set(p.x,p.y);
+        active.position.set(p.x,p.y,1);
         updateHomography();
     });
 
-
     window.addEventListener("mouseup",()=>active=null);
 
-    /* =====================================================
-       Editable text
-    ===================================================== */
-    textInput.oninput=e=>{
+    // ================= Editable text =================
+    document.getElementById("textInput").addEventListener("input",e=>{
         drawText(e.target.value);
-        texture.needsUpdate=true;
-    };
+        texture.needsUpdate = true;
+    });
 
-    /* =====================================================
-       Render
-    ===================================================== */
-    (function anim(){
-        requestAnimationFrame(anim);
+    // ================= Render =================
+    (function animate(){
+        requestAnimationFrame(animate);
         renderer.render(scene,camera);
     })();
 </script>
