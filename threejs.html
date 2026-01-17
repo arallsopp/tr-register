@@ -42,7 +42,7 @@
 
     const bgImage = new Image();
     bgImage.src = "assets/artwork/evening-road-run.jpg";
-    bgImage.onload = () => drawBackground();
+    bgImage.onload = drawBackground;
 
     function drawBackground(){
         bgCtx.clearRect(0,0,bgCanvas.width,bgCanvas.height);
@@ -78,29 +78,26 @@
     function drawTextCanvas(text=document.getElementById("textInput").value){
         ctx.clearRect(0,0,TEXT_W,TEXT_H);
         ctx.fillStyle = "#fff";
-        ctx.clearRect(0,0,TEXT_W,TEXT_H); // transparent
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 40px Arial Black,sans-serif";
+        ctx.font = "bold 100px Arial Black,sans-serif";
         ctx.textAlign = "left";
         ctx.textBaseline = "alphabetic";
         const lines = text.split("\n");
-        const lineHeight = 40;
-        const totalHeight = lines.length*lineHeight;
-        let y = TEXT_H/2 - totalHeight/2 + lineHeight/2;
+        const lineHeight = 120;
+        let y = 0 + lineHeight; // start at top + lineHeight
         for(let line of lines){
-            ctx.fillText(line, TEXT_W/2, y);
+            ctx.fillText(line, 0, y);
             y += lineHeight;
         }
         textTexture.needsUpdate = true;
     }
 
     // ------------------- Plane -------------------
+    // Plane with top-left origin
     const geometry = new THREE.PlaneGeometry(TEXT_W, TEXT_H);
+    geometry.translate(TEXT_W/2, TEXT_H/2, 0); // shift so 0,0 is top-left
+
     const material = new THREE.ShaderMaterial({
-        uniforms: {
-            map: { value: textTexture },
-            Hinv: { value: new THREE.Matrix3() },
-        },
+        uniforms: { map: { value: textTexture }, Hinv: { value: new THREE.Matrix3() } },
         vertexShader: `
     varying vec2 vUv;
     void main(){
@@ -115,23 +112,20 @@
     void main(){
       vec3 p = Hinv * vec3(vUv,1.0);
       vec2 uv = p.xy / p.z / vec2(${TEXT_W.toFixed(1)}, ${TEXT_H.toFixed(1)});
-      if(uv.x<0.0 || uv.x>1.0 || uv.y<0.0 || uv.y>1.0) discard;
+      if(uv.x<0.0||uv.x>1.0||uv.y<0.0||uv.y>1.0) discard;
       gl_FragColor = texture2D(map, uv);
     }
   `,
         transparent: true
     });
+
     const mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
 
     // ------------------- Debug box -------------------
     const debugGeo = new THREE.PlaneGeometry(TEXT_W, TEXT_H);
-    const debugMat = new THREE.MeshBasicMaterial({
-        color: 0x00ff00,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.5
-    });
+    debugGeo.translate(TEXT_W/2, TEXT_H/2, 0);
+    const debugMat = new THREE.MeshBasicMaterial({ color:0x00ff00, wireframe:true, transparent:true, opacity:0.5 });
     const debugBox = new THREE.Mesh(debugGeo, debugMat);
     scene.add(debugBox);
 
@@ -139,8 +133,8 @@
     function updatePlanePosition(){
         const px = parseFloat(document.getElementById("planeX").value);
         const py = parseFloat(document.getElementById("planeY").value);
-        mesh.position.set(px + TEXT_W/2, py + TEXT_H/2, 0);
-        debugBox.position.set(px + TEXT_W/2, py + TEXT_H/2, -0.1);
+        mesh.position.set(px, py, 0);
+        debugBox.position.set(px, py, -0.1);
     }
 
     // ------------------- Corner inputs -------------------
@@ -149,10 +143,8 @@
         const px = parseFloat(document.getElementById("planeX").value);
         const py = parseFloat(document.getElementById("planeY").value);
         return ids.map(([xid,yid])=>{
-            return {
-                x: parseFloat(document.getElementById(xid).value) + px,
-                y: parseFloat(document.getElementById(yid).value) + py
-            };
+            return { x: parseFloat(document.getElementById(xid).value)+px,
+                y: parseFloat(document.getElementById(yid).value)+py };
         });
     }
 
@@ -184,33 +176,35 @@
     }
 
     // ------------------- Event listeners -------------------
-    document.getElementById("textInput").addEventListener("input", e=>{
-        drawTextCanvas(e.target.value);
+    document.getElementById("textInput").addEventListener("input", ()=>{
+        drawTextCanvas();
         updateHomography();
     });
-    document.querySelectorAll(".corner-input").forEach(input=> {
+
+    document.querySelectorAll(".corner-input").forEach(input=>{
         input.addEventListener("input", updateHomography);
     });
-        document.getElementById("planeX").addEventListener("input", ()=>{
-            updatePlanePosition();
-            updateHomography();
-        });
-        document.getElementById("planeY").addEventListener("input", ()=>{
-            updatePlanePosition();
-            updateHomography();
-        });
 
-// ------------------- Animate -------------------
-        drawTextCanvas();
+    document.getElementById("planeX").addEventListener("input", ()=>{
         updatePlanePosition();
         updateHomography();
+    });
+    document.getElementById("planeY").addEventListener("input", ()=>{
+        updatePlanePosition();
+        updateHomography();
+    });
 
-        function animate(){
-            requestAnimationFrame(animate);
-            drawBackground();
-            renderer.render(scene,camera);
-        }
-        animate();
+    // ------------------- Animate -------------------
+    drawTextCanvas();
+    updatePlanePosition();
+    updateHomography();
+
+    function animate(){
+        requestAnimationFrame(animate);
+        drawBackground();
+        renderer.render(scene,camera);
+    }
+    animate();
 </script>
 
 </body>
