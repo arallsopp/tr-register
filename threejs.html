@@ -23,23 +23,40 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
 
+<canvas id="bgCanvas"></canvas>
 <script>
+    const bgCanvas = document.getElementById("bgCanvas");
+    const bgCtx = bgCanvas.getContext("2d");
+    bgCanvas.width = window.innerWidth;
+    bgCanvas.height = window.innerHeight;
+
+    // Load background image
+    const bgImage = new Image();
+    bgImage.src = "assets/artwork/evening-road-run.jpg"; // local image
+    bgImage.onload = () => {
+        // Draw the background to fill canvas
+        bgCtx.drawImage(bgImage, 0, 0, bgCanvas.width, bgCanvas.height);
+        drawTextCanvas(); // initial text render
+    };
+
+    // -------------------- THREE.js setup --------------------
     const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera(-500,500,300,-300,1,2000);
+    const camera = new THREE.OrthographicCamera(-window.innerWidth/2, window.innerWidth/2,
+        window.innerHeight/2, -window.innerHeight/2, 1, 2000);
     camera.position.z = 1000;
 
-    const renderer = new THREE.WebGLRenderer({antialias:true});
+    const renderer = new THREE.WebGLRenderer({alpha:true});
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
-    document.body.appendChild(renderer.domElement);
 
-    // -------------------- Background Image --------------------
-    const bgTexture = new THREE.TextureLoader().load('assets/artwork/evening-road-run.jpg');
-    const bgGeometry = new THREE.PlaneGeometry(1000, 600);
-    const bgMaterial = new THREE.MeshBasicMaterial({ map: bgTexture });
-    const bgMesh = new THREE.Mesh(bgGeometry, bgMaterial);
-    bgMesh.position.z = -1; // behind text
-    scene.add(bgMesh);
+    // We'll render into an offscreen canvas
+    const threeCanvas = renderer.domElement;
+
+    // Append the THREE.js canvas **on top** of bgCanvas
+    threeCanvas.style.position = "absolute";
+    threeCanvas.style.top = "0";
+    threeCanvas.style.left = "0";
+    document.body.appendChild(threeCanvas);
 
     // -------------------- Text Canvas --------------------
     const TEXT_W = 1024, TEXT_H = 256;
@@ -52,16 +69,12 @@
     textTexture.minFilter = THREE.LinearFilter;
     textTexture.magFilter = THREE.LinearFilter;
 
-    function drawText(text) {
+    function drawTextCanvas(text="CANVAS\nPRINT"){
         ctx.clearRect(0,0,TEXT_W,TEXT_H);
-
-        // transparent background
         ctx.fillStyle = "rgba(0,0,0,0)";
         ctx.fillRect(0,0,TEXT_W,TEXT_H);
-
-        // draw multi-line text
         const lines = text.split("\n");
-        ctx.fillStyle = "#000";
+        ctx.fillStyle = "#FFF";
         ctx.font = "bold 100px Arial Black,sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -72,40 +85,30 @@
             ctx.fillText(line, TEXT_W/2, y);
             y += lineHeight;
         }
-
         textTexture.needsUpdate = true;
     }
-
-    // initial draw
-    drawText(document.getElementById("textInput").value);
 
     // -------------------- Distorted Text Plane --------------------
     const PLANE_W = 800, PLANE_H = 200;
     const geometry = new THREE.PlaneGeometry(PLANE_W, PLANE_H,1,1);
 
     const material = new THREE.ShaderMaterial({
-        uniforms: {
-            map: { value: textTexture },
-            Hinv: { value: new THREE.Matrix3() }
-        },
+        uniforms: { map: { value: textTexture }, Hinv: { value: new THREE.Matrix3() } },
         vertexShader: `
-    varying vec2 vUv;
-    void main(){
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
-    }
-  `,
+        varying vec2 vUv;
+        void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }
+    `,
         fragmentShader: `
-    uniform sampler2D map;
-    uniform mat3 Hinv;
-    varying vec2 vUv;
-    void main(){
-      vec3 p = Hinv * vec3(vUv,1.0);
-      vec2 uv = p.xy / p.z;
-      if(uv.x<0.0||uv.x>1.0||uv.y<0.0||uv.y>1.0) discard;
-      gl_FragColor = texture2D(map, uv);
-    }
-  `,
+        uniform sampler2D map;
+        uniform mat3 Hinv;
+        varying vec2 vUv;
+        void main() {
+            vec3 p = Hinv * vec3(vUv,1.0);
+            vec2 uv = p.xy / p.z;
+            if(uv.x<0.0||uv.x>1.0||uv.y<0.0||uv.y>1.0) discard;
+            gl_FragColor = texture2D(map, uv);
+        }
+    `,
         transparent:true
     });
 
@@ -114,10 +117,10 @@
 
     // -------------------- Corner Handles --------------------
     const corners = [
-        new THREE.Vector2(-PLANE_W/2, PLANE_H/2),  // TL
-        new THREE.Vector2( PLANE_W/2, PLANE_H/2),  // TR
-        new THREE.Vector2( PLANE_W/2,-PLANE_H/2),  // BR
-        new THREE.Vector2(-PLANE_W/2,-PLANE_H/2)   // BL
+        new THREE.Vector2(-PLANE_W/2, PLANE_H/2),
+        new THREE.Vector2(PLANE_W/2, PLANE_H/2),
+        new THREE.Vector2(PLANE_W/2, -PLANE_H/2),
+        new THREE.Vector2(-PLANE_W/2, -PLANE_H/2)
     ];
 
     const handleGeo = new THREE.CircleGeometry(8,16);
@@ -186,17 +189,20 @@
 
     window.addEventListener("mouseup",()=>active=null);
 
-    // -------------------- Editable Text --------------------
+    // -------------------- Text input --------------------
     document.getElementById("textInput").addEventListener("input", e=>{
-        drawText(e.target.value);
+        drawTextCanvas(e.target.value);
     });
 
-    // -------------------- Animation --------------------
+    // -------------------- Animate --------------------
     updateHomography();
     (function animate(){
         requestAnimationFrame(animate);
+        renderer.clear(); // clear WebGL canvas
         renderer.render(scene,camera);
     })();
+</script>
+
 </script>
 
 </body>
