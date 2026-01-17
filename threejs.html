@@ -19,11 +19,14 @@
 
 <div id="ui">
     <textarea id="textInput">CANVAS\nPRINT</textarea>
-    <p>Corner positions (pixels, top-left origin)</p>
-    <div class="corner-row">TL: X <input type="number" class="corner-input" id="tlx" value="100"> Y <input type="number" class="corner-input" id="tly" value="100"></div>
-    <div class="corner-row">TR: X <input type="number" class="corner-input" id="trx" value="700"> Y <input type="number" class="corner-input" id="try" value="100"></div>
-    <div class="corner-row">BR: X <input type="number" class="corner-input" id="brx" value="700"> Y <input type="number" class="corner-input" id="bry" value="300"></div>
-    <div class="corner-row">BL: X <input type="number" class="corner-input" id="blx" value="100"> Y <input type="number" class="corner-input" id="bly" value="300"></div>
+    <p>Plane Position</p>
+    <div class="corner-row">Plane X: <input type="number" id="planeX" value="100"></div>
+    <div class="corner-row">Plane Y: <input type="number" id="planeY" value="100"></div>
+    <p>Corner positions (pixels, relative to plane top-left)</p>
+    <div class="corner-row">TL: X <input type="number" class="corner-input" id="tlx" value="0"> Y <input type="number" class="corner-input" id="tly" value="0"></div>
+    <div class="corner-row">TR: X <input type="number" class="corner-input" id="trx" value="1024"> Y <input type="number" class="corner-input" id="try" value="0"></div>
+    <div class="corner-row">BR: X <input type="number" class="corner-input" id="brx" value="1024"> Y <input type="number" class="corner-input" id="bry" value="256"></div>
+    <div class="corner-row">BL: X <input type="number" class="corner-input" id="blx" value="0"> Y <input type="number" class="corner-input" id="bly" value="256"></div>
 </div>
 
 <canvas id="bgCanvas"></canvas>
@@ -77,11 +80,11 @@
         ctx.fillStyle = "#fff";
         ctx.clearRect(0,0,TEXT_W,TEXT_H); // transparent
         ctx.fillStyle = "#fff";
-        ctx.font = "bold 100px Arial Black,sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
+        ctx.font = "bold 40px Arial Black,sans-serif";
+        ctx.textAlign = "left";
+        ctx.textBaseline = "alphabetic";
         const lines = text.split("\n");
-        const lineHeight = 120;
+        const lineHeight = 30;
         const totalHeight = lines.length*lineHeight;
         let y = TEXT_H/2 - totalHeight/2 + lineHeight/2;
         for(let line of lines){
@@ -101,7 +104,6 @@
         vertexShader: `
     varying vec2 vUv;
     void main(){
-      // vUv in pixels
       vUv = uv * vec2(${TEXT_W.toFixed(1)}, ${TEXT_H.toFixed(1)});
       gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
     }
@@ -121,13 +123,36 @@
     });
     const mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
-    mesh.position.set(TEXT_W/2, TEXT_H/2, 0);
+
+    // ------------------- Debug box -------------------
+    const debugGeo = new THREE.PlaneGeometry(TEXT_W, TEXT_H);
+    const debugMat = new THREE.MeshBasicMaterial({
+        color: 0x00ff00,
+        wireframe: true,
+        transparent: true,
+        opacity: 0.5
+    });
+    const debugBox = new THREE.Mesh(debugGeo, debugMat);
+    scene.add(debugBox);
+
+    // ------------------- Plane position -------------------
+    function updatePlanePosition(){
+        const px = parseFloat(document.getElementById("planeX").value);
+        const py = parseFloat(document.getElementById("planeY").value);
+        mesh.position.set(px + TEXT_W/2, py + TEXT_H/2, 0);
+        debugBox.position.set(px + TEXT_W/2, py + TEXT_H/2, -0.1);
+    }
 
     // ------------------- Corner inputs -------------------
     function getCorners(){
         const ids = [['tlx','tly'],['trx','try'],['brx','bry'],['blx','bly']];
+        const px = parseFloat(document.getElementById("planeX").value);
+        const py = parseFloat(document.getElementById("planeY").value);
         return ids.map(([xid,yid])=>{
-            return { x: parseFloat(document.getElementById(xid).value), y: parseFloat(document.getElementById(yid).value) };
+            return {
+                x: parseFloat(document.getElementById(xid).value) + px,
+                y: parseFloat(document.getElementById(yid).value) + py
+            };
         });
     }
 
@@ -163,20 +188,29 @@
         drawTextCanvas(e.target.value);
         updateHomography();
     });
-    document.querySelectorAll(".corner-input").forEach(input=>{
+    document.querySelectorAll(".corner-input").forEach(input=> {
         input.addEventListener("input", updateHomography);
     });
+        document.getElementById("planeX").addEventListener("input", ()=>{
+            updatePlanePosition();
+            updateHomography();
+        });
+        document.getElementById("planeY").addEventListener("input", ()=>{
+            updatePlanePosition();
+            updateHomography();
+        });
 
-    // ------------------- Animate -------------------
-    drawTextCanvas();
-    updateHomography();
+// ------------------- Animate -------------------
+        drawTextCanvas();
+        updatePlanePosition();
+        updateHomography();
 
-    function animate(){
-        requestAnimationFrame(animate);
-        drawBackground();
-        renderer.render(scene,camera);
-    }
-    animate();
+        function animate(){
+            requestAnimationFrame(animate);
+            drawBackground();
+            renderer.render(scene,camera);
+        }
+        animate();
 </script>
 
 </body>
