@@ -2,64 +2,67 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Text Warp Over Background</title>
+    <title>Warped Text on Background</title>
     <style>
-        body { margin:0; overflow:hidden; background:#eee; font-family:sans-serif; }
+        body { margin:0; overflow:hidden; font-family:sans-serif; }
         #ui {
-            position: fixed;
-            top:10px; left:10px;
-            background:white; padding:10px; border-radius:6px;
+            position: fixed; top:10px; left:10px;
+            background: rgba(0,0,0,0.6); padding:10px;
+            border-radius:6px; z-index:10; color:white;
         }
-        #textInput { width:200px; height:80px; }
+        textarea { width:200px; height:80px; display:block; margin-bottom:10px; }
+        .corner-input { width:60px; }
+        .corner-row { margin-bottom:5px; }
     </style>
 </head>
 <body>
 
 <div id="ui">
     <textarea id="textInput">CANVAS\nPRINT</textarea>
-    <div style="font-size:12px;">Drag red corners</div>
+    <p>Corner positions (pixels, top-left origin)</p>
+    <div class="corner-row">TL: X <input type="number" class="corner-input" id="tlx" value="100"> Y <input type="number" class="corner-input" id="tly" value="100"></div>
+    <div class="corner-row">TR: X <input type="number" class="corner-input" id="trx" value="700"> Y <input type="number" class="corner-input" id="try" value="100"></div>
+    <div class="corner-row">BR: X <input type="number" class="corner-input" id="brx" value="700"> Y <input type="number" class="corner-input" id="bry" value="300"></div>
+    <div class="corner-row">BL: X <input type="number" class="corner-input" id="blx" value="100"> Y <input type="number" class="corner-input" id="bly" value="300"></div>
 </div>
+
+<canvas id="bgCanvas"></canvas>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
-
-<canvas id="bgCanvas"></canvas>
 <script>
+    // ------------------- Background -------------------
     const bgCanvas = document.getElementById("bgCanvas");
     const bgCtx = bgCanvas.getContext("2d");
     bgCanvas.width = window.innerWidth;
     bgCanvas.height = window.innerHeight;
 
-    // Load background image
     const bgImage = new Image();
-    bgImage.src = "assets/artwork/evening-road-run.jpg"; // local image
-    bgImage.onload = () => {
-        // Draw the background to fill canvas
-        bgCtx.drawImage(bgImage, 0, 0, bgCanvas.width, bgCanvas.height);
-        drawTextCanvas(); // initial text render
-    };
+    bgImage.src = "assets/artwork/evening-road-run.jpg";
+    bgImage.onload = () => drawBackground();
 
-    // -------------------- THREE.js setup --------------------
+    function drawBackground(){
+        bgCtx.clearRect(0,0,bgCanvas.width,bgCanvas.height);
+        bgCtx.drawImage(bgImage,0,0,bgCanvas.width,bgCanvas.height);
+    }
+
+    // ------------------- Three.js -------------------
     const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera(-window.innerWidth/2, window.innerWidth/2,
-        window.innerHeight/2, -window.innerHeight/2, 1, 2000);
-    camera.position.z = 1000;
+    const camera = new THREE.OrthographicCamera(
+        0, window.innerWidth, window.innerHeight, 0, -10, 10
+    );
+    camera.position.z = 1;
 
     const renderer = new THREE.WebGLRenderer({alpha:true});
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.domElement.style.position = "absolute";
+    renderer.domElement.style.top = "0";
+    renderer.domElement.style.left = "0";
+    document.body.appendChild(renderer.domElement);
 
-    // We'll render into an offscreen canvas
-    const threeCanvas = renderer.domElement;
-
-    // Append the THREE.js canvas **on top** of bgCanvas
-    threeCanvas.style.position = "absolute";
-    threeCanvas.style.top = "0";
-    threeCanvas.style.left = "0";
-    document.body.appendChild(threeCanvas);
-
-    // -------------------- Text Canvas --------------------
-    const TEXT_W = 1024, TEXT_H = 256;
+    // ------------------- Text canvas -------------------
+    const TEXT_W = 1024;
+    const TEXT_H = 256;
     const textCanvas = document.createElement("canvas");
     textCanvas.width = TEXT_W;
     textCanvas.height = TEXT_H;
@@ -69,78 +72,71 @@
     textTexture.minFilter = THREE.LinearFilter;
     textTexture.magFilter = THREE.LinearFilter;
 
-    function drawTextCanvas(text="CANVAS\nPRINT"){
+    function drawTextCanvas(text=document.getElementById("textInput").value){
         ctx.clearRect(0,0,TEXT_W,TEXT_H);
-        ctx.fillStyle = "rgba(0,0,0,0)";
-        ctx.fillRect(0,0,TEXT_W,TEXT_H);
-        const lines = text.split("\n");
-        ctx.fillStyle = "#FFF";
+        ctx.fillStyle = "#fff";
+        ctx.clearRect(0,0,TEXT_W,TEXT_H); // transparent
+        ctx.fillStyle = "#fff";
         ctx.font = "bold 100px Arial Black,sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
+        const lines = text.split("\n");
         const lineHeight = 120;
-        const totalHeight = lines.length * lineHeight;
+        const totalHeight = lines.length*lineHeight;
         let y = TEXT_H/2 - totalHeight/2 + lineHeight/2;
-        for (let line of lines) {
+        for(let line of lines){
             ctx.fillText(line, TEXT_W/2, y);
             y += lineHeight;
         }
         textTexture.needsUpdate = true;
     }
 
-    // -------------------- Distorted Text Plane --------------------
-    const PLANE_W = 800, PLANE_H = 200;
-    const geometry = new THREE.PlaneGeometry(PLANE_W, PLANE_H,1,1);
-
+    // ------------------- Plane -------------------
+    const geometry = new THREE.PlaneGeometry(TEXT_W, TEXT_H);
     const material = new THREE.ShaderMaterial({
-        uniforms: { map: { value: textTexture }, Hinv: { value: new THREE.Matrix3() } },
+        uniforms: {
+            map: { value: textTexture },
+            Hinv: { value: new THREE.Matrix3() },
+        },
         vertexShader: `
-        varying vec2 vUv;
-        void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }
-    `,
+    varying vec2 vUv;
+    void main(){
+      // vUv in pixels
+      vUv = uv * vec2(${TEXT_W.toFixed(1)}, ${TEXT_H.toFixed(1)});
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0);
+    }
+  `,
         fragmentShader: `
-        uniform sampler2D map;
-        uniform mat3 Hinv;
-        varying vec2 vUv;
-        void main() {
-            vec3 p = Hinv * vec3(vUv,1.0);
-            vec2 uv = p.xy / p.z;
-            if(uv.x<0.0||uv.x>1.0||uv.y<0.0||uv.y>1.0) discard;
-            gl_FragColor = texture2D(map, uv);
-        }
-    `,
-        transparent:true
+    uniform sampler2D map;
+    uniform mat3 Hinv;
+    varying vec2 vUv;
+    void main(){
+      vec3 p = Hinv * vec3(vUv,1.0);
+      vec2 uv = p.xy / p.z / vec2(${TEXT_W.toFixed(1)}, ${TEXT_H.toFixed(1)});
+      if(uv.x<0.0 || uv.x>1.0 || uv.y<0.0 || uv.y>1.0) discard;
+      gl_FragColor = texture2D(map, uv);
+    }
+  `,
+        transparent: true
     });
-
     const mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
+    mesh.position.set(TEXT_W/2, TEXT_H/2, 0);
 
-    // -------------------- Corner Handles --------------------
-    const corners = [
-        new THREE.Vector2(-PLANE_W/2, PLANE_H/2),
-        new THREE.Vector2(PLANE_W/2, PLANE_H/2),
-        new THREE.Vector2(PLANE_W/2, -PLANE_H/2),
-        new THREE.Vector2(-PLANE_W/2, -PLANE_H/2)
-    ];
+    // ------------------- Corner inputs -------------------
+    function getCorners(){
+        const ids = [['tlx','tly'],['trx','try'],['brx','bry'],['blx','bly']];
+        return ids.map(([xid,yid])=>{
+            return { x: parseFloat(document.getElementById(xid).value), y: parseFloat(document.getElementById(yid).value) };
+        });
+    }
 
-    const handleGeo = new THREE.CircleGeometry(8,16);
-    const handleMat = new THREE.MeshBasicMaterial({color:0xff0000});
-    const handles = [];
-
-    corners.forEach((c,i)=>{
-        const h = new THREE.Mesh(handleGeo,handleMat);
-        h.position.set(c.x,c.y,1);
-        h.userData.index = i;
-        scene.add(h);
-        handles.push(h);
-    });
-
-    // -------------------- Homography --------------------
+    // ------------------- Homography -------------------
     function computeHomography(src,dst){
-        const X = [], Y=[];
+        const X=[], Y=[];
         for(let i=0;i<4;i++){
-            const xs=src[i].x,ys=src[i].y;
-            const xd=dst[i].x,yd=dst[i].y;
+            const xs=src[i].x, ys=src[i].y;
+            const xd=dst[i].x, yd=dst[i].y;
             X.push([xs,ys,1,0,0,0,-xs*xd,-ys*xd]);
             X.push([0,0,0,xs,ys,1,-xs*yd,-ys*yd]);
             Y.push(xd); Y.push(yd);
@@ -148,61 +144,39 @@
         const h = numeric.solve(X,Y);
         h.push(1);
         const H = new THREE.Matrix3();
-        H.set(h[0],h[1],h[2],h[3],h[4],h[5],h[6],h[7],h[8]);
+        H.set(h[0],h[1],h[2], h[3],h[4],h[5], h[6],h[7],h[8]);
         return H;
     }
 
     function updateHomography(){
-        const srcQuad = [{x:0,y:1},{x:1,y:1},{x:1,y:0},{x:0,y:0}];
-        const dstQuad = corners.map(c=>({x:(c.x+PLANE_W/2)/PLANE_W,y:(c.y+PLANE_H/2)/PLANE_H}));
+        const srcQuad = [
+            {x:0,y:0},{x:TEXT_W,y:0},{x:TEXT_W,y:TEXT_H},{x:0,y:TEXT_H}
+        ];
+        const dstQuad = getCorners();
         const H = computeHomography(srcQuad,dstQuad);
         H.invert();
         material.uniforms.Hinv.value.copy(H);
     }
 
-    // -------------------- Dragging --------------------
-    const raycaster = new THREE.Raycaster();
-    const mouse = new THREE.Vector2();
-    let active=null;
-
-    window.addEventListener("mousedown", e=>{
-        mouse.x=(e.clientX/window.innerWidth)*2-1;
-        mouse.y=-(e.clientY/window.innerHeight)*2+1;
-        raycaster.setFromCamera(mouse,camera);
-        const hit = raycaster.intersectObjects(handles);
-        if(hit.length) active = hit[0].object;
-    });
-
-    window.addEventListener("mousemove", e=>{
-        if(!active) return;
-        mouse.x=(e.clientX/window.innerWidth)*2-1;
-        mouse.y=-(e.clientY/window.innerHeight)*2+1;
-        raycaster.setFromCamera(mouse,camera);
-        const plane = new THREE.Plane(new THREE.Vector3(0,0,1),0);
-        const p = new THREE.Vector3();
-        raycaster.ray.intersectPlane(plane,p);
-        const i = active.userData.index;
-        corners[i].set(p.x,p.y);
-        active.position.set(p.x,p.y,1);
-        updateHomography();
-    });
-
-    window.addEventListener("mouseup",()=>active=null);
-
-    // -------------------- Text input --------------------
+    // ------------------- Event listeners -------------------
     document.getElementById("textInput").addEventListener("input", e=>{
         drawTextCanvas(e.target.value);
+        updateHomography();
+    });
+    document.querySelectorAll(".corner-input").forEach(input=>{
+        input.addEventListener("input", updateHomography);
     });
 
-    // -------------------- Animate --------------------
+    // ------------------- Animate -------------------
+    drawTextCanvas();
     updateHomography();
-    (function animate(){
-        requestAnimationFrame(animate);
-        renderer.clear(); // clear WebGL canvas
-        renderer.render(scene,camera);
-    })();
-</script>
 
+    function animate(){
+        requestAnimationFrame(animate);
+        drawBackground();
+        renderer.render(scene,camera);
+    }
+    animate();
 </script>
 
 </body>
