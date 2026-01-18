@@ -239,6 +239,7 @@ const images = {
             perspective: {
                 enabled: true,  // or true to enable by default
                 maxWidth: 400,
+                maxLines: 2,
                 corners: [
                     {x: -11, y: -32},      // top-left
                     {x: 427, y: -79},    // top-right

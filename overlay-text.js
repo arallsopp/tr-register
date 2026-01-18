@@ -178,6 +178,16 @@ function drawPerspectiveTextBlock(ctx, textBlock, userText, corners) {
         maxWidth = perspective.maxWidth;
     }
 
+    // Use fixed maxLines if specified - add extra height for missing lines
+    if (perspective?.maxLines && activeLines.length < perspective.maxLines) {
+        const missingLines = perspective.maxLines - activeLines.length;
+        // Use the last line's height as template for missing lines
+        const lastLineHeight = lineMetrics.length > 0
+            ? lineMetrics[lineMetrics.length - 1].height
+            : defaultStyle.size * 1.2; // fallback
+        totalHeight += missingLines * lastLineHeight;
+    }
+
     // Add padding to prevent clipping
     const padding = 20;
 
@@ -532,6 +542,12 @@ function loadFromConfig(useSample = false) {
             cornerBLX.value = Math.round(persp.corners[3].x);
             cornerBLY.value = Math.round(persp.corners[3].y);
         }
+
+        // Load maxWidth and maxLines
+        const maxWidthInput = document.getElementById('perspectiveMaxWidth');
+        const maxLinesInput = document.getElementById('perspectiveMaxLines');
+        if (maxWidthInput) maxWidthInput.value = persp.maxWidth || '';
+        if (maxLinesInput) maxLinesInput.value = persp.maxLines || '';
     } else {
         // No perspective or disabled - uncheck and clear values
         perspectiveToggle.checked = false;
@@ -543,6 +559,11 @@ function loadFromConfig(useSample = false) {
         cornerBRY.value = 200;
         cornerBLX.value = 0;
         cornerBLY.value = 200;
+
+        const maxWidthInput = document.getElementById('perspectiveMaxWidth');
+        const maxLinesInput = document.getElementById('perspectiveMaxLines');
+        if (maxWidthInput) maxWidthInput.value = '';
+        if (maxLinesInput) maxLinesInput.value = '';
     }
 
     if (useSample) {
@@ -770,6 +791,32 @@ perspectiveEditMode.addEventListener('change', () => {
         updateAll();
     });
 });
+
+// NEW: Max Width and Max Lines input handlers
+const maxWidthInput = document.getElementById('perspectiveMaxWidth');
+const maxLinesInput = document.getElementById('perspectiveMaxLines');
+
+if (maxWidthInput) {
+    maxWidthInput.addEventListener('input', () => {
+        const img = images[imageChoiceSelect.value];
+        if (!img.textBlock.perspective) return;
+
+        const value = parseFloat(maxWidthInput.value);
+        img.textBlock.perspective.maxWidth = value || undefined;
+        updateAll();
+    });
+}
+
+if (maxLinesInput) {
+    maxLinesInput.addEventListener('input', () => {
+        const img = images[imageChoiceSelect.value];
+        if (!img.textBlock.perspective) return;
+
+        const value = parseInt(maxLinesInput.value);
+        img.textBlock.perspective.maxLines = value || undefined;
+        updateAll();
+    });
+}
 
 /* handle events */
 ['userText','rotate','skewX','skewY'].forEach(id => {
