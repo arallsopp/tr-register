@@ -45,7 +45,12 @@ Promise.all([
     document.fonts.load('75px Racing Sans One'),
     document.fonts.load('75px Damion')
 ]).then(() => {
+    console.log('All fonts loaded');
     //fonts are ready, we can render.
+    updateFormValuesFromURLParams();
+}).catch(err => {
+    console.error('Error loading fonts:', err);
+    // Still try to render even if fonts fail
     updateFormValuesFromURLParams();
 });
 
@@ -511,19 +516,30 @@ function loadFromConfig(useSample = false) {
 
     // NEW: Load perspective settings
     const persp = img.textBlock.perspective;
-    if (persp) {
-        perspectiveToggle.checked = persp.enabled || false;
+    if (persp && persp.enabled) {
+        perspectiveToggle.checked = true;
 
         if (persp.corners) {
-            cornerTLX.value = persp.corners[0].x;
-            cornerTLY.value = persp.corners[0].y;
-            cornerTRX.value = persp.corners[1].x;
-            cornerTRY.value = persp.corners[1].y;
-            cornerBRX.value = persp.corners[2].x;
-            cornerBRY.value = persp.corners[2].y;
-            cornerBLX.value = persp.corners[3].x;
-            cornerBLY.value = persp.corners[3].y;
+            cornerTLX.value = Math.round(persp.corners[0].x);
+            cornerTLY.value = Math.round(persp.corners[0].y);
+            cornerTRX.value = Math.round(persp.corners[1].x);
+            cornerTRY.value = Math.round(persp.corners[1].y);
+            cornerBRX.value = Math.round(persp.corners[2].x);
+            cornerBRY.value = Math.round(persp.corners[2].y);
+            cornerBLX.value = Math.round(persp.corners[3].x);
+            cornerBLY.value = Math.round(persp.corners[3].y);
         }
+    } else {
+        // No perspective or disabled - uncheck and clear values
+        perspectiveToggle.checked = false;
+        cornerTLX.value = 0;
+        cornerTLY.value = 0;
+        cornerTRX.value = 400;
+        cornerTRY.value = 0;
+        cornerBRX.value = 400;
+        cornerBRY.value = 200;
+        cornerBLX.value = 0;
+        cornerBLY.value = 200;
     }
 
     if (useSample) {
@@ -787,7 +803,11 @@ scale.addEventListener('input', () => {
 imageChoiceSelect.addEventListener('change', () => {
     updateUX();
     loadFromConfig(true);
-    updateAll();
+
+    // Wait a brief moment for UI to update before rendering
+    setTimeout(() => {
+        updateAll();
+    }, 0);
 });
 
 document.getElementById('saveBtn').onclick = () => {
