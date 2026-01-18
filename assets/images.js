@@ -238,11 +238,12 @@ const images = {
             },
             perspective: {
                 enabled: true,  // or true to enable by default
+                maxWidth: 400,
                 corners: [
-                    {x: 0, y: 0},      // top-left
-                    {x: 400, y: 0},    // top-right
-                    {x: 400, y: 200},  // bottom-right
-                    {x: 0, y: 200}     // bottom-left
+                    {x: -11, y: -32},      // top-left
+                    {x: 427, y: -79},    // top-right
+                    {x: 425, y: 56},  // bottom-right
+                    {x: -16, y: 92}     // bottom-left
                 ]
             },
             defaultStyle: {
@@ -259,8 +260,8 @@ const images = {
                 }
             },
             lines: [
-                { text: 'EVENING ROAD RUN      9/5' },
-                { text: 'TIM + SAM                     5:45'}
+                { text: 'EVENING ROAD RUN        9/5' },
+                { text: 'TIM + SAM                      5:45'}
             ]
         }
     },

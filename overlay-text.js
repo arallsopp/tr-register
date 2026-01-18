@@ -139,7 +139,7 @@ function subdivideAndDraw(sourceCanvas, src, dst, subdivisions) {
 }
 
 function drawPerspectiveTextBlock(ctx, textBlock, userText, corners) {
-    const { defaultStyle, lines } = textBlock;
+    const { defaultStyle, lines, perspective } = textBlock;
     const activeLines = resolveLinesWithInheritance(lines, userText);
 
     // Create temporary canvas for the text
@@ -164,6 +164,11 @@ function drawPerspectiveTextBlock(ctx, textBlock, userText, corners) {
         maxWidth = Math.max(maxWidth, width);
         totalHeight += height;
     });
+
+    // Use fixed maxWidth if specified in perspective config
+    if (perspective?.maxWidth) {
+        maxWidth = perspective.maxWidth;
+    }
 
     // Add padding to prevent clipping
     const padding = 20;
