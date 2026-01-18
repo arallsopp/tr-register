@@ -38,6 +38,9 @@ const handleRadius = 8;
 const imageCache = {};
 let uploadedImage = null;
 
+// NEW: Store original image configurations for reset
+const originalImages = JSON.parse(JSON.stringify(images));
+
 // Load custom fonts before we start rendering.
 Promise.all([
     document.fonts.load('75px chalkboard'),
@@ -566,6 +569,7 @@ function updateAll() {
     t.skew.y = parseFloat(skewY.value);
 
     renderImage(img, userText.value);
+    updateUX(); // Update reset button state
 }
 
 const uploadCrop = {
@@ -620,6 +624,14 @@ function updateUX() {
     const uploadOnlyElements = document.getElementsByClassName("upload-only");
     for (let element of uploadOnlyElements) {
         element.classList.toggle('visually-hidden', images[imageChoiceSelect.value].meta.sourceType !== 'upload');
+    }
+
+    // NEW: Show/hide reset button based on whether config has been modified
+    const resetBtn = document.getElementById('resetTemplateBtn');
+    if (resetBtn) {
+        const currentConfig = JSON.stringify(images[imageChoiceSelect.value]);
+        const originalConfig = JSON.stringify(originalImages[imageChoiceSelect.value]);
+        resetBtn.disabled = currentConfig === originalConfig;
     }
 }
 
@@ -863,5 +875,22 @@ cropY.addEventListener('input', () => {
     uploadCrop.offsetY = parseFloat(cropY.value);
     updateAll();
 });
+
+// NEW: Reset template button
+const resetTemplateBtn = document.getElementById('resetTemplateBtn');
+if (resetTemplateBtn) {
+    resetTemplateBtn.addEventListener('click', () => {
+        const key = imageChoiceSelect.value;
+
+        // Deep clone the original config back
+        images[key] = JSON.parse(JSON.stringify(originalImages[key]));
+
+        // Reload the form with the reset values
+        loadFromConfig(false); // Don't change user text
+        updateAll();
+
+        console.log('Template reset to original configuration');
+    });
+}
 
 imageChoiceSelect.dispatchEvent(new Event('change'));
