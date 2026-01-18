@@ -7,7 +7,7 @@ const OUTPUT_HEIGHT = 765;
 // grab the controls
 const textX = document.getElementById('textX'),
     textY = document.getElementById('textY'),
-    scale= document.getElementById('scale'),
+    scale = document.getElementById('scale'),
     overlayOffsetX = document.getElementById('overlayOffsetX'),
     overlayOffsetY = document.getElementById('overlayOffsetY'),
     overlayScale = document.getElementById('overlayScale'),
@@ -16,6 +16,23 @@ const textX = document.getElementById('textX'),
     overlayToggle = document.getElementById('overlayToggle'),
     cropX = document.getElementById('cropX'),
     cropY = document.getElementById('cropY');
+
+// NEW: Perspective controls
+const perspectiveToggle = document.getElementById('perspectiveToggle'),
+    perspectiveEditMode = document.getElementById('perspectiveEditMode'),
+    cornerTLX = document.getElementById('cornerTLX'),
+    cornerTLY = document.getElementById('cornerTLY'),
+    cornerTRX = document.getElementById('cornerTRX'),
+    cornerTRY = document.getElementById('cornerTRY'),
+    cornerBRX = document.getElementById('cornerBRX'),
+    cornerBRY = document.getElementById('cornerBRY'),
+    cornerBLX = document.getElementById('cornerBLX'),
+    cornerBLY = document.getElementById('cornerBLY');
+
+// NEW: Perspective state
+let editMode = false;
+let draggingCorner = null;
+const handleRadius = 8;
 
 //support upload image and utilise cache to avoid constant reloads.
 const imageCache = {};
@@ -56,6 +73,149 @@ function resolveLinesWithInheritance(configLines, userText) {
     });
 }
 
+// NEW: Perspective transformation functions
+function lerp2D(p1, p2, t) {
+    return {
+        x: p1.x + (p2.x - p1.x) * t,
+        y: p1.y + (p2.y - p1.y) * t
+    };
+}
+
+function drawAffineQuad(sourceCanvas, src, dst) {
+    const x0 = src[0].x, y0 = src[0].y;
+    const x1 = src[1].x, y1 = src[1].y;
+    const x2 = src[3].x, y2 = src[3].y;
+
+    const dx0 = dst[0].x, dy0 = dst[0].y;
+    const dx1 = dst[1].x, dy1 = dst[1].y;
+    const dx2 = dst[3].x, dy2 = dst[3].y;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(dst[0].x, dst[0].y);
+    ctx.lineTo(dst[1].x, dst[1].y);
+    ctx.lineTo(dst[2].x, dst[2].y);
+    ctx.lineTo(dst[3].x, dst[3].y);
+    ctx.closePath();
+    ctx.clip();
+
+    const a = (dx1 - dx0) / (x1 - x0);
+    const b = (dy1 - dy0) / (x1 - x0);
+    const c = (dx2 - dx0) / (y2 - y0);
+    const d = (dy2 - dy0) / (y2 - y0);
+    const e = dx0 - a * x0 - c * y0;
+    const f = dy0 - b * x0 - d * y0;
+
+    ctx.transform(a, b, c, d, e, f);
+    ctx.drawImage(sourceCanvas, 0, 0);
+    ctx.restore();
+}
+
+function subdivideAndDraw(sourceCanvas, src, dst, subdivisions) {
+    for (let i = 0; i < subdivisions; i++) {
+        for (let j = 0; j < subdivisions; j++) {
+            const u0 = i / subdivisions;
+            const u1 = (i + 1) / subdivisions;
+            const v0 = j / subdivisions;
+            const v1 = (j + 1) / subdivisions;
+
+            const srcQuad = [
+                lerp2D(lerp2D(src[0], src[1], u0), lerp2D(src[3], src[2], u0), v0),
+                lerp2D(lerp2D(src[0], src[1], u1), lerp2D(src[3], src[2], u1), v0),
+                lerp2D(lerp2D(src[0], src[1], u1), lerp2D(src[3], src[2], u1), v1),
+                lerp2D(lerp2D(src[0], src[1], u0), lerp2D(src[3], src[2], u0), v1)
+            ];
+
+            const dstQuad = [
+                lerp2D(lerp2D(dst[0], dst[1], u0), lerp2D(dst[3], dst[2], u0), v0),
+                lerp2D(lerp2D(dst[0], dst[1], u1), lerp2D(dst[3], dst[2], u1), v0),
+                lerp2D(lerp2D(dst[0], dst[1], u1), lerp2D(dst[3], dst[2], u1), v1),
+                lerp2D(lerp2D(dst[0], dst[1], u0), lerp2D(dst[3], dst[2], u0), v1)
+            ];
+
+            drawAffineQuad(sourceCanvas, srcQuad, dstQuad);
+        }
+    }
+}
+
+function drawPerspectiveTextBlock(ctx, textBlock, userText, corners) {
+    const { defaultStyle, lines } = textBlock;
+    const activeLines = resolveLinesWithInheritance(lines, userText);
+
+    // Create temporary canvas for the text
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+
+    // Measure total text dimensions
+    let maxWidth = 0;
+    let totalHeight = 0;
+    const lineMetrics = [];
+
+    activeLines.forEach(line => {
+        const style = { ...defaultStyle, ...line.style };
+        const scale = line.transform?.scale ?? 1;
+
+        tempCtx.font = `${style.size}px ${style.font}`;
+        const metrics = tempCtx.measureText(line.text);
+        const width = metrics.width * scale;
+        const height = style.lineHeight * scale;
+
+        lineMetrics.push({ width, height, style, scale, text: line.text });
+        maxWidth = Math.max(maxWidth, width);
+        totalHeight += height;
+    });
+
+    // Add padding to prevent clipping
+    const padding = 20;
+
+    // Set temp canvas size with padding
+    tempCanvas.width = maxWidth + padding * 2;
+    tempCanvas.height = totalHeight + padding * 2;
+
+    // Draw text to temp canvas
+    tempCtx.textAlign = defaultStyle.align;
+    tempCtx.textBaseline = 'top';  // Changed from alphabetic to top
+
+    let y = padding;
+    lineMetrics.forEach(line => {
+        tempCtx.save();
+        tempCtx.scale(line.scale, line.scale);
+        tempCtx.font = `${line.style.size}px ${line.style.font}`;
+        tempCtx.fillStyle = line.style.color;
+
+        if (line.style.shadow) {
+            tempCtx.shadowColor = line.style.shadow.shadowColor;
+            tempCtx.shadowOffsetX = line.style.shadow.shadowOffsetX || 0;
+            tempCtx.shadowOffsetY = line.style.shadow.shadowOffsetY || 0;
+            tempCtx.shadowBlur = line.style.shadow.shadowBlur || 0;
+        }
+
+        let textX = padding / line.scale;
+
+        if (defaultStyle.align === 'center') {
+            textX = tempCanvas.width / 2 / line.scale;
+        } else if (defaultStyle.align === 'right') {
+            textX = (tempCanvas.width - padding) / line.scale;
+        }
+
+        tempCtx.fillText(line.text, textX, y / line.scale);
+        tempCtx.restore();
+
+        y += line.height;
+    });
+
+    // Source rectangle
+    const src = [
+        {x: 0, y: 0},
+        {x: tempCanvas.width, y: 0},
+        {x: tempCanvas.width, y: tempCanvas.height},
+        {x: 0, y: tempCanvas.height}
+    ];
+
+    // Apply perspective transformation
+    subdivideAndDraw(tempCanvas, src, corners, 10);
+}
+
 function drawPerspectiveText(ctx, text, style, perspective, y) {
     const {
         increment = 1.1,
@@ -64,47 +224,43 @@ function drawPerspectiveText(ctx, text, style, perspective, y) {
     } = perspective;
 
     const chars = [...text];
-
-    // Measure each character once
-    const baseWidths = chars.map(c =>
-        ctx.measureText(c).width
-    );
+    const baseWidths = chars.map(c => ctx.measureText(c).width);
 
     let x = 0,
-        increment_at_position = 1
+        increment_at_position = 1;
 
     chars.forEach((char, i) => {
         const scale = increment_at_position;
         const charWidth = baseWidths[i] * scale;
 
         ctx.save();
-
-        // Move to character origin
         ctx.translate(x, y);
-
-        // Apply perspective
-        ctx.transform(
-            0.9 * scale,      // we normally want it slightly narrower.
-            skewY,      // skew Y
-            skewX,      // skew X
-            scale,      // scale Y
-            0,
-            0
-        );
-
+        ctx.transform(0.9 * scale, skewY, skewX, scale, 0, 0);
         ctx.fillText(char, 0, 0);
-
         ctx.restore();
 
-        // Amount of ADVANCE is SCALED
         x += charWidth;
         increment_at_position += increment;
     });
 }
+
 function renderTextBlock(ctx, block, userTextOverride) {
-    const { transform, defaultStyle, lines } = block;
+    const { transform, defaultStyle, lines, perspective } = block;
     const blockScale = transform.scale || 1;
 
+    // NEW: Check if perspective quad mode is enabled
+    if (perspective?.enabled && perspective?.corners) {
+        ctx.save();
+        ctx.translate(transform.position.x, transform.position.y);
+        ctx.scale(blockScale, blockScale);
+
+        drawPerspectiveTextBlock(ctx, block, userTextOverride, perspective.corners);
+
+        ctx.restore();
+        return;
+    }
+
+    // Original rendering code
     ctx.save();
 
     ctx.translate(transform.position.x, transform.position.y);
@@ -116,7 +272,7 @@ function renderTextBlock(ctx, block, userTextOverride) {
     }
 
     ctx.textAlign = defaultStyle.align;
-    ctx.textBaseline = 'alphabetic'; //try to stabilise Y position on iOS/Safari
+    ctx.textBaseline = 'alphabetic';
 
     const activeLines = resolveLinesWithInheritance(lines, userTextOverride);
 
@@ -141,9 +297,9 @@ function renderTextBlock(ctx, block, userTextOverride) {
             ctx.shadowColor = 'transparent';
         }
 
-        const baselineAdjust = style.size * 0.35
-        if (block.perspective?.enabled) {
-            // fake perspective/fontsize renderer
+        const baselineAdjust = style.size * 0.35;
+        if (block.perspective?.enabled && block.perspective?.increment) {
+            // Old fake perspective/fontsize renderer
             drawPerspectiveText(ctx, line.text, style, block.perspective, (y / scale) + baselineAdjust);
         } else {
             // normal renderer
@@ -156,7 +312,44 @@ function renderTextBlock(ctx, block, userTextOverride) {
     ctx.restore();
 }
 
-// Function to get URL parameters
+// NEW: Draw perspective control handles
+function drawPerspectiveHandles(ctx, corners, transform, blockScale) {
+    const baseX = transform.position.x;
+    const baseY = transform.position.y;
+
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+
+    // Draw quad outline
+    ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    corners.forEach((corner, i) => {
+        const x = baseX + corner.x * blockScale;
+        const y = baseY + corner.y * blockScale;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+    });
+    ctx.closePath();
+    ctx.stroke();
+
+    // Draw corner handles
+    ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 2;
+
+    corners.forEach(corner => {
+        const x = baseX + corner.x * blockScale;
+        const y = baseY + corner.y * blockScale;
+        ctx.beginPath();
+        ctx.arc(x, y, handleRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+    });
+
+    ctx.restore();
+}
+
 function getUrlParams() {
     const params = new URLSearchParams(window.location.search);
     return {
@@ -165,12 +358,10 @@ function getUrlParams() {
     };
 }
 
-// Function to update the select and textarea elements
 function updateFormValuesFromURLParams(){
     const { image, text } = getUrlParams();
 
     if (image) {
-        // Set the image selection
         const imageChoice = document.getElementById('imageChoice');
         const imageOption = [...imageChoice.options].find(option => option.value === image);
         if (imageOption) {
@@ -180,12 +371,10 @@ function updateFormValuesFromURLParams(){
     }
 
     if (text) {
-        // Set the textarea value, preserving spaces and newlines
         const textarea = document.getElementById('userText');
         textarea.value = decodeURIComponent(text);
         textarea.dispatchEvent(new Event('input'));
     }
-
 }
 
 function renderImage(imageConfig, userText) {
@@ -198,27 +387,17 @@ function renderImage(imageConfig, userText) {
     const draw = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // -------------------------
         // 1 Base image
-        // -------------------------
         if (imageConfig.meta.sourceType === 'upload') {
             canvas.width = OUTPUT_WIDTH;
             canvas.height = OUTPUT_HEIGHT;
 
             if(baseImage) {
-                drawUploadedImageCrop(
-                    ctx,
-                    baseImage,
-                    canvas.width,
-                    canvas.height,
-                    uploadCrop
-                );
+                drawUploadedImageCrop(ctx, baseImage, canvas.width, canvas.height, uploadCrop);
             }else{
-                //baseImage isn't set yet, so just draw a black box.
                 ctx.fillStyle = 'black';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                //and add instructions
                 ctx.fillStyle = 'white';
                 ctx.font = '40px Racing Sans One';
                 ctx.textAlign = 'center';
@@ -231,9 +410,7 @@ function renderImage(imageConfig, userText) {
             ctx.drawImage(baseImage, 0, 0);
         }
 
-        // -------------------------
         // 2 Overlay + bound text
-        // -------------------------
         if (imageConfig.overlay?.enabled) {
             const overlay = imageConfig.overlay;
 
@@ -249,15 +426,10 @@ function renderImage(imageConfig, userText) {
                 return;
             }
 
-            // ---- draw overlay ----
             const scale = imageConfig.overlay.scale || 1;
-
             const w = overlayImg.naturalWidth * scale;
             const h = overlayImg.naturalHeight * scale;
-
-            // 🔑 Bottom-right–relative positioning
             const offset = overlay.offset || { x: 0, y: 0 };
-
             const x = canvas.width - w - offset.x;
             const y = canvas.height - h - offset.y;
 
@@ -266,9 +438,7 @@ function renderImage(imageConfig, userText) {
             ctx.drawImage(overlayImg, x, y, w, h);
             ctx.restore();
 
-            // ---- draw text relative to overlay ----
             const textOffset = overlay.textOffset || { x: 0, y: 0 };
-
             const textBlock = imageConfig.textBlock;
 
             renderTextBlock(ctx, {
@@ -284,10 +454,17 @@ function renderImage(imageConfig, userText) {
             }, userText);
 
         } else {
-            // -------------------------
             // 3 Text only (no overlay)
-            // -------------------------
             renderTextBlock(ctx, imageConfig.textBlock, userText);
+        }
+
+        // NEW: Draw perspective handles in edit mode
+        if (editMode && imageConfig.textBlock.perspective?.enabled && imageConfig.textBlock.perspective?.corners) {
+            const transform = imageConfig.textBlock.transform;
+            const blockScale = imageConfig.overlay?.enabled ? imageConfig.overlay.scale || 1 : transform.scale || 1;
+
+            console.log('Drawing handles - editMode:', editMode, 'corners:', imageConfig.textBlock.perspective.corners);
+            drawPerspectiveHandles(ctx, imageConfig.textBlock.perspective.corners, transform, blockScale);
         }
     };
 
@@ -298,15 +475,11 @@ function renderImage(imageConfig, userText) {
             baseImage.onload = draw;
         }
     }else{
-        //baseImage isn't set yet.
         draw();
     }
 }
 
-
 const overlayCache = {};
-
-// UI Wiring
 
 Object.entries(images).forEach(([key, img]) => {
     const option = document.createElement('option');
@@ -326,10 +499,27 @@ function loadFromConfig(useSample = false) {
     skewX.value = t.skew?.x || 0;
     skewY.value = t.skew?.y || 0;
 
-    overlayToggle.checked = img.overlay?.enabled || 0
+    overlayToggle.checked = img.overlay?.enabled || 0;
     overlayOffsetX.value = img.overlay?.offset?.x || 0;
     overlayOffsetY.value = img.overlay?.offset?.y || 0;
     overlayScale.value = img.overlay?.scale || 1;
+
+    // NEW: Load perspective settings
+    const persp = img.textBlock.perspective;
+    if (persp) {
+        perspectiveToggle.checked = persp.enabled || false;
+
+        if (persp.corners) {
+            cornerTLX.value = persp.corners[0].x;
+            cornerTLY.value = persp.corners[0].y;
+            cornerTRX.value = persp.corners[1].x;
+            cornerTRY.value = persp.corners[1].y;
+            cornerBRX.value = persp.corners[2].x;
+            cornerBRY.value = persp.corners[2].y;
+            cornerBLX.value = persp.corners[3].x;
+            cornerBLY.value = persp.corners[3].y;
+        }
+    }
 
     if (useSample) {
         userText.value = img.textBlock.lines.map(l => l.text).join('\n');
@@ -340,7 +530,7 @@ function loadFromConfig(useSample = false) {
         img.meta.prompt ? `(${img.meta.prompt})` : '';
 
     overlayToggle.dispatchEvent(new Event('change'));
-
+    perspectiveToggle.dispatchEvent(new Event('change'));
 }
 
 function updateAll() {
@@ -358,9 +548,9 @@ function updateAll() {
 }
 
 const uploadCrop = {
-    offsetX: 0.5, // 0 = left, 0.5 = center, 1 = right
-    offsetY: 0.5  // 0 = top,  0.5 = center, 1 = bottom
-}
+    offsetX: 0.5,
+    offsetY: 0.5
+};
 
 function drawUploadedImageCrop(ctx, img, cw, ch, crop) {
     const imgW = img.naturalWidth;
@@ -379,10 +569,8 @@ function drawUploadedImageCrop(ctx, img, cw, ch, crop) {
         cropH = cropW / canvasAspect;
     }
 
-    //update controls as we go past
     cropX.disabled = !(imgAspect > canvasAspect);
     cropY.disabled = (imgAspect >= canvasAspect);
-
 
     const maxX = imgW - cropW;
     const maxY = imgH - cropH;
@@ -408,12 +596,147 @@ function getBaseImage(imageConfig) {
 }
 
 function updateUX() {
-    // show/hide upload-only elements based upon image selection
     const uploadOnlyElements = document.getElementsByClassName("upload-only");
     for (let element of uploadOnlyElements) {
         element.classList.toggle('visually-hidden', images[imageChoiceSelect.value].meta.sourceType !== 'upload');
     }
 }
+
+// NEW: Canvas mouse events for dragging corners
+canvas.addEventListener('mousedown', (e) => {
+    if (!editMode) {
+        console.log('Not in edit mode');
+        return;
+    }
+
+    const img = images[imageChoiceSelect.value];
+    if (!img.textBlock.perspective?.enabled || !img.textBlock.perspective?.corners) {
+        console.log('Perspective not enabled or no corners');
+        return;
+    }
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const mouseX = (e.clientX - rect.left) * scaleX;
+    const mouseY = (e.clientY - rect.top) * scaleY;
+
+    const transform = img.textBlock.transform;
+    const blockScale = img.overlay?.enabled ? img.overlay.scale || 1 : transform.scale || 1;
+    const baseX = transform.position.x;
+    const baseY = transform.position.y;
+
+    console.log('Mouse click at:', mouseX, mouseY);
+    console.log('Base position:', baseX, baseY);
+
+    img.textBlock.perspective.corners.forEach((corner, i) => {
+        const x = baseX + corner.x * blockScale;
+        const y = baseY + corner.y * blockScale;
+        const dist = Math.sqrt((mouseX - x) ** 2 + (mouseY - y) ** 2);
+        console.log(`Corner ${i} at (${x}, ${y}), distance: ${dist}`);
+        if (dist < handleRadius * 2) {
+            draggingCorner = i;
+            console.log('Started dragging corner', i);
+        }
+    });
+});
+
+canvas.addEventListener('mousemove', (e) => {
+    if (draggingCorner === null) return;
+
+    const img = images[imageChoiceSelect.value];
+    if (!img.textBlock.perspective?.corners) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const mouseX = (e.clientX - rect.left) * scaleX;
+    const mouseY = (e.clientY - rect.top) * scaleY;
+
+    const transform = img.textBlock.transform;
+    const blockScale = img.overlay?.enabled ? img.overlay.scale || 1 : transform.scale || 1;
+    const baseX = transform.position.x;
+    const baseY = transform.position.y;
+
+    img.textBlock.perspective.corners[draggingCorner].x = (mouseX - baseX) / blockScale;
+    img.textBlock.perspective.corners[draggingCorner].y = (mouseY - baseY) / blockScale;
+
+    updateCornerInputs();
+    updateAll();
+});
+
+canvas.addEventListener('mouseup', () => {
+    if (draggingCorner !== null) {
+        console.log('Stopped dragging corner', draggingCorner);
+    }
+    draggingCorner = null;
+});
+
+// NEW: Update corner inputs from current values
+function updateCornerInputs() {
+    const img = images[imageChoiceSelect.value];
+    if (!img.textBlock.perspective?.corners) return;
+
+    const corners = img.textBlock.perspective.corners;
+    cornerTLX.value = Math.round(corners[0].x);
+    cornerTLY.value = Math.round(corners[0].y);
+    cornerTRX.value = Math.round(corners[1].x);
+    cornerTRY.value = Math.round(corners[1].y);
+    cornerBRX.value = Math.round(corners[2].x);
+    cornerBRY.value = Math.round(corners[2].y);
+    cornerBLX.value = Math.round(corners[3].x);
+    cornerBLY.value = Math.round(corners[3].y);
+}
+
+// NEW: Perspective event handlers
+perspectiveToggle.addEventListener('change', () => {
+    const img = images[imageChoiceSelect.value];
+
+    if (!img.textBlock.perspective) {
+        img.textBlock.perspective = {
+            enabled: false,
+            corners: [
+                {x: 0, y: 0},
+                {x: 400, y: 0},
+                {x: 400, y: 200},
+                {x: 0, y: 200}
+            ]
+        };
+    }
+
+    img.textBlock.perspective.enabled = perspectiveToggle.checked;
+
+    const perspectiveControls = document.querySelectorAll('.perspective-control input, .perspective-control button');
+    perspectiveControls.forEach(el => el.disabled = !perspectiveToggle.checked);
+
+    console.log('Perspective toggled:', img.textBlock.perspective.enabled);
+    updateAll();
+});
+
+perspectiveEditMode.addEventListener('change', () => {
+    editMode = perspectiveEditMode.checked;
+    console.log('Edit mode:', editMode);
+    updateAll();
+});
+
+// Corner input handlers
+[cornerTLX, cornerTLY, cornerTRX, cornerTRY, cornerBRX, cornerBRY, cornerBLX, cornerBLY].forEach((input, i) => {
+    input.addEventListener('input', () => {
+        const img = images[imageChoiceSelect.value];
+        if (!img.textBlock.perspective?.corners) return;
+
+        const cornerIndex = Math.floor(i / 2);
+        const isX = i % 2 === 0;
+
+        if (isX) {
+            img.textBlock.perspective.corners[cornerIndex].x = parseFloat(input.value);
+        } else {
+            img.textBlock.perspective.corners[cornerIndex].y = parseFloat(input.value);
+        }
+
+        updateAll();
+    });
+});
 
 /* handle events */
 ['userText','rotate','skewX','skewY'].forEach(id => {
@@ -431,23 +754,25 @@ textY.addEventListener('input', () => {
     img.textBlock.transform.position.y = parseFloat(textY.value);
     updateAll();
 });
+
 overlayOffsetX.addEventListener('input', () => {
     const img = images[imageChoiceSelect.value];
     img.overlay.offset.x = parseFloat(overlayOffsetX.value);
-    console.log(img.overlay.offset);
     updateAll();
 });
+
 overlayOffsetY.addEventListener('input', () => {
     const img = images[imageChoiceSelect.value];
     img.overlay.offset.y = parseFloat(overlayOffsetY.value);
-    console.log(img.overlay.offset);
     updateAll();
 });
+
 overlayScale.addEventListener('input', () => {
     const img = images[imageChoiceSelect.value];
     img.overlay.scale = parseFloat(overlayScale.value);
     updateAll();
-})
+});
+
 scale.addEventListener('input', () => {
     const img = images[imageChoiceSelect.value];
     img.textBlock.transform.scale = parseFloat(scale.value);
@@ -460,7 +785,6 @@ imageChoiceSelect.addEventListener('change', () => {
     updateAll();
 });
 
-//save button
 document.getElementById('saveBtn').onclick = () => {
     ctx.save();
     ctx.globalCompositeOperation = 'destination-over';
@@ -475,21 +799,15 @@ document.getElementById('saveBtn').onclick = () => {
     link.click();
 };
 
-//upload image
 uploadInput.addEventListener('change', () => {
     const file = uploadInput.files[0];
-    if (!file){
-        console.log('no file');
-        return;
-    }
+    if (!file) return;
 
     const img = new Image();
-
     img.onload = () => {
         uploadedImage = img;
         updateAll();
     };
-
     img.src = URL.createObjectURL(file);
 });
 
@@ -500,9 +818,8 @@ overlayToggle.addEventListener('change', () => {
         updateAll();
     }
 
-    //update the UI
     const overlayOnlyInputs = document.querySelectorAll(".overlay-only input"),
-          nonOverlayInputs = document.querySelectorAll(".non-overlay input");
+        nonOverlayInputs = document.querySelectorAll(".non-overlay input");
 
     for (let element of overlayOnlyInputs) {
         element.disabled = !overlayToggle.checked;
@@ -522,6 +839,4 @@ cropY.addEventListener('input', () => {
     updateAll();
 });
 
-//handle initial load
 imageChoiceSelect.dispatchEvent(new Event('change'));
-

@@ -237,8 +237,13 @@ const images = {
                 skew: { x: -0.01, y: -0.09 }
             },
             perspective: {
-                 enabled: true,
-                 increment:0.005
+                enabled: true,  // or true to enable by default
+                corners: [
+                    {x: 0, y: 0},      // top-left
+                    {x: 400, y: 0},    // top-right
+                    {x: 400, y: 200},  // bottom-right
+                    {x: 0, y: 200}     // bottom-left
+                ]
             },
             defaultStyle: {
                 font: 'Harmattan',
