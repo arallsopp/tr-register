@@ -575,6 +575,12 @@ function loadFromConfig(useSample = false) {
     document.getElementById('line-count-preference').textContent =
         img.meta.prompt ? `(${img.meta.prompt})` : '';
 
+    // Set font selector
+    const fontChoice = document.getElementById('fontChoice');
+    if (fontChoice) {
+        fontChoice.value = img.textBlock.defaultStyle.font || 'chalkboard';
+    }
+
     overlayToggle.dispatchEvent(new Event('change'));
     perspectiveToggle.dispatchEvent(new Event('change'));
 }
@@ -826,6 +832,23 @@ if (maxLinesInput) {
 }
 
 /* handle events */
+// Font selector handler
+document.getElementById('fontChoice').addEventListener('change', () => {
+    const img = images[imageChoiceSelect.value];
+    const selectedFont = document.getElementById('fontChoice').value;
+
+    // Update the default font for the text block
+    img.textBlock.defaultStyle.font = selectedFont;
+
+    // Also update all line-specific fonts if they exist
+    img.textBlock.lines.forEach(line => {
+        if (line.style && line.style.font) {
+            line.style.font = selectedFont;
+        }
+    });
+
+    updateAll();
+});
 ['userText','rotate','skewX','skewY'].forEach(id => {
     document.getElementById(id).addEventListener('input', updateAll);
 });
