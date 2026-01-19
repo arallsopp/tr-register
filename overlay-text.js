@@ -584,6 +584,22 @@ function loadFromConfig(useSample = false) {
     overlayToggle.dispatchEvent(new Event('change'));
     perspectiveToggle.dispatchEvent(new Event('change'));
 }
+// Text color handler
+document.getElementById('textColor').addEventListener('input', () => {
+    const img = images[imageChoiceSelect.value];
+    const color = document.getElementById('textColor').value;
+
+    img.textBlock.defaultStyle.color = color;
+
+    // Update all line-specific colors if they exist
+    img.textBlock.lines.forEach(line => {
+        if (line.style) {
+            line.style.color = color;
+        }
+    });
+
+    updateAll();
+});
 
 function updateAll() {
     const img = images[imageChoiceSelect.value];
