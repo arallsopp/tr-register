@@ -180,10 +180,9 @@ function drawPerspectiveTextBlock(ctx, textBlock, userText, corners) {
     // Use fixed maxLines if specified - add extra height for missing lines
     if (perspective?.maxLines && activeLines.length < perspective.maxLines) {
         const missingLines = perspective.maxLines - activeLines.length;
-        // Use the last line's height as template for missing lines
         const lastLineHeight = lineMetrics.length > 0
             ? lineMetrics[lineMetrics.length - 1].height
-            : defaultStyle.size * 1.2; // fallback
+            : defaultStyle.size * 1.2;
         totalHeight += missingLines * lastLineHeight;
     }
 
@@ -194,9 +193,9 @@ function drawPerspectiveTextBlock(ctx, textBlock, userText, corners) {
     tempCanvas.width = maxWidth + padding * 2;
     tempCanvas.height = totalHeight + padding * 2;
 
-    // Draw text to temp canvas
+    // Draw text to temp canvas - using alphabetic baseline for iOS consistency
     tempCtx.textAlign = defaultStyle.align;
-    tempCtx.textBaseline = 'top';  // Changed from alphabetic to top
+    tempCtx.textBaseline = 'alphabetic';  // Changed back to alphabetic for iOS
 
     let y = padding;
     lineMetrics.forEach(line => {
@@ -212,6 +211,9 @@ function drawPerspectiveTextBlock(ctx, textBlock, userText, corners) {
             tempCtx.shadowBlur = line.style.shadow.shadowBlur || 0;
         }
 
+        // iOS baseline adjustment
+        const baselineAdjust = line.style.size * 0.35;
+
         let textX = padding / line.scale;
 
         if (defaultStyle.align === 'center') {
@@ -220,7 +222,7 @@ function drawPerspectiveTextBlock(ctx, textBlock, userText, corners) {
             textX = (tempCanvas.width - padding) / line.scale;
         }
 
-        tempCtx.fillText(line.text, textX, y / line.scale);
+        tempCtx.fillText(line.text, textX, (y / line.scale) + baselineAdjust);
         tempCtx.restore();
 
         y += line.height;
