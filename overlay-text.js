@@ -91,8 +91,7 @@ function lerp2D(p1, p2, t) {
 
 function drawAffineQuad(sourceCanvas, src, dst) {
     const x0 = src[0].x, y0 = src[0].y;
-    const x1 = src[1].x, y1 = src[1].y;
-    const x2 = src[3].x, y2 = src[3].y;
+    const x1 = src[1].x, y2 = src[3].y;
 
     const dx0 = dst[0].x, dy0 = dst[0].y;
     const dx1 = dst[1].x, dy1 = dst[1].y;
@@ -870,6 +869,30 @@ imageChoiceSelect.addEventListener('change', () => {
 });
 
 document.getElementById('saveBtn').onclick = () => {
+    const editingPerspective = perspectiveToggle.checked;
+
+    //work out the best filename to use
+    const selectedOption = imageChoiceSelect.options[imageChoiceSelect.selectedIndex];
+    const imageDisplayName = selectedOption.textContent;
+
+    const cleanImageName = imageDisplayName
+        .replace(/[^a-zA-Z0-9]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+        .toLowerCase();
+    const cleanUserText = userText.value
+        .replace(/[^a-zA-Z0-9]/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
+        .toLowerCase();
+    const idealFilename = cleanImageName + '-' + cleanUserText + '.jpg';
+
+    if(editingPerspective) {
+        //turn it off before saving
+        perspectiveEditMode.checked = false;
+        perspectiveEditMode.dispatchEvent(new Event('change'));
+    }
+
     ctx.save();
     ctx.globalCompositeOperation = 'destination-over';
     ctx.fillStyle = '#ffffff';
@@ -879,8 +902,14 @@ document.getElementById('saveBtn').onclick = () => {
     const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
     const link = document.createElement('a');
     link.href = dataUrl;
-    link.download = 'image_with_text.jpg';
+    link.download = idealFilename;
     link.click();
+
+    if(editingPerspective) {
+        //restore edit mode
+        perspectiveEditMode.checked = true;
+        perspectiveEditMode.dispatchEvent(new Event('change'));
+    }
 };
 
 uploadInput.addEventListener('change', () => {
