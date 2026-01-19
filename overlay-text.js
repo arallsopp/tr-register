@@ -15,7 +15,9 @@ const textX = document.getElementById('textX'),
     uploadInput = document.getElementById('imageUpload'),
     overlayToggle = document.getElementById('overlayToggle'),
     cropX = document.getElementById('cropX'),
-    cropY = document.getElementById('cropY');
+    cropY = document.getElementById('cropY'),
+    shadowToggle = document.getElementById('shadowToggle');
+
 
 // NEW: Perspective controls
 const perspectiveToggle = document.getElementById('perspectiveToggle'),
@@ -198,6 +200,8 @@ function drawPerspectiveTextBlock(ctx, textBlock, userText, corners) {
     tempCtx.textAlign = defaultStyle.align;
     tempCtx.textBaseline = 'alphabetic';  // Changed back to alphabetic for iOS
 
+    const shadowEnabled = defaultStyle.shadow.enabled;
+
     let y = padding;
     lineMetrics.forEach(line => {
         tempCtx.save();
@@ -205,7 +209,7 @@ function drawPerspectiveTextBlock(ctx, textBlock, userText, corners) {
         tempCtx.font = `${line.style.size}px ${line.style.font}`;
         tempCtx.fillStyle = line.style.color;
 
-        if (line.style.shadow) {
+        if (line.style.shadow && shadowEnabled) {
             tempCtx.shadowColor = line.style.shadow.shadowColor;
             tempCtx.shadowOffsetX = line.style.shadow.shadowOffsetX || 0;
             tempCtx.shadowOffsetY = line.style.shadow.shadowOffsetY || 0;
@@ -585,10 +589,17 @@ function loadFromConfig(useSample = false) {
         fontChoice.value = img.textBlock.defaultStyle.font || 'chalkboard';
     }
 
+    // Load shadow settings
+    shadowToggle.checked = img.textBlock.defaultStyle.shadow.enabled || false;
+
+    shadowToggle.dispatchEvent(new Event('change'));
     overlayToggle.dispatchEvent(new Event('change'));
     perspectiveToggle.dispatchEvent(new Event('change'));
-    distortionMode.dispatchEvent(new Event('change'));
+    distortionMode.dispatchEvent(new Event('change')); //this will update all
+
+
 }
+
 // Text color handler
 document.getElementById('textColor').addEventListener('input', () => {
     const img = images[imageChoiceSelect.value];
@@ -602,6 +613,14 @@ document.getElementById('textColor').addEventListener('input', () => {
             line.style.color = color;
         }
     });
+
+    updateAll();
+});
+
+// Shadow toggle handler
+document.getElementById('shadowToggle').addEventListener('change', () => {
+    const img = images[imageChoiceSelect.value];
+    img.textBlock.defaultStyle.shadow.enabled = shadowToggle.checked;
 
     updateAll();
 });

@@ -25,7 +25,9 @@ const images ={
                 "color": "rgba(255,255,255,0.8)",
                 "align": "left",
                 "lineHeight": 101,
-                "shadow": null
+                "shadow": {
+                    "enabled":false
+                }
             },
             "lines": [
                 {
@@ -88,7 +90,9 @@ const images ={
                 "color": "rgba(255,255,255,0.8)",
                 "align": "left",
                 "lineHeight": 60,
-                "shadow": null
+                "shadow": {
+                   "enabled":false
+                }
             },
             "lines": [
                 {
@@ -152,6 +156,7 @@ const images ={
                 "align": "left",
                 "lineHeight": 52,
                 "shadow": {
+                    "enabled":true,
                     "shadowColor": "rgba(0,0,0,0.8)",
                     "shadowBlur": 1,
                     "shadowOffsetX": 1,
@@ -219,6 +224,7 @@ const images ={
                 "align": "center",
                 "lineHeight": 43,
                 "shadow": {
+                    "enabled":true,
                     "shadowColor": "rgba(0,0,0,1)",
                     "shadowBlur": 6,
                     "shadowOffsetX": 1,
@@ -281,6 +287,7 @@ const images ={
                 "align": "left",
                 "lineHeight": 49,
                 "shadow": {
+                    "enabled":false,
                     "shadowColor": "rgba(0,0,0,1)",
                     "shadowBlur": 2,
                     "shadowOffsetX": 1,
@@ -345,7 +352,9 @@ const images ={
                 "color": "rgb(38,62,47)",
                 "align": "right",
                 "lineHeight": 65,
-                "shadow": null
+                "shadow": {
+                    "enabled":false
+                }
             },
             "lines": [
                 {
@@ -408,7 +417,9 @@ const images ={
                 "color": "rgb(28,41,25)",
                 "align": "center",
                 "lineHeight": 107,
-                "shadow": null
+                "shadow": {
+                    "enabled":false
+                }
             },
             "lines": [
                 {
@@ -494,6 +505,7 @@ const images ={
                 "align": "left",
                 "lineHeight": 39,
                 "shadow": {
+                    "enabled":true,
                     "shadowColor": "rgba(0,0,0,1)",
                     "shadowBlur": 2,
                     "shadowOffsetX": 2,
@@ -560,6 +572,7 @@ const images ={
                 "align": "left",
                 "lineHeight": 32,
                 "shadow": {
+                    "enabled":true,
                     "shadowColor": "rgba(0,0,0,1)",
                     "shadowBlur": 2,
                     "shadowOffsetX": 1,
@@ -612,6 +625,7 @@ const images ={
                 "align": "left",
                 "lineHeight": 67,
                 "shadow": {
+                    "enabled": true,
                     "shadowColor": "rgba(0,0,0,1)",
                     "shadowBlur": 3,
                     "shadowOffsetX": 2,

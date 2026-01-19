@@ -28,6 +28,11 @@
     margin-bottom: 1em;
 }
 
+.big-checkbox{
+    width: 28px;
+    margin-top: 7px;
+}
+
 @media (min-width: 992px) {
     /* desktop screens, the scroll-column scrolls */
     .scroll-column{
