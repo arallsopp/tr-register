@@ -200,7 +200,7 @@ function drawPerspectiveTextBlock(ctx, textBlock, userText, corners) {
     tempCtx.textAlign = defaultStyle.align;
     tempCtx.textBaseline = 'alphabetic';  // Changed back to alphabetic for iOS
 
-    const shadowEnabled = defaultStyle.shadow.enabled;
+    const shadowEnabled = defaultStyle.shadow?.enabled || false;
 
     let y = padding;
     lineMetrics.forEach(line => {
@@ -209,11 +209,14 @@ function drawPerspectiveTextBlock(ctx, textBlock, userText, corners) {
         tempCtx.font = `${line.style.size}px ${line.style.font}`;
         tempCtx.fillStyle = line.style.color;
 
-        if (line.style.shadow && shadowEnabled) {
+        if (shadowEnabled && line.style.shadow) {
             tempCtx.shadowColor = line.style.shadow.shadowColor;
             tempCtx.shadowOffsetX = line.style.shadow.shadowOffsetX || 0;
             tempCtx.shadowOffsetY = line.style.shadow.shadowOffsetY || 0;
             tempCtx.shadowBlur = line.style.shadow.shadowBlur || 0;
+        } else {
+            //explicitly disable shadows if not enabled in style
+            tempCtx.shadowColor = 'transparent';
         }
 
         // iOS baseline adjustment
@@ -317,7 +320,7 @@ function renderTextBlock(ctx, block, userTextOverride) {
         ctx.font = `${style.size}px ${style.font}`;
         ctx.fillStyle = style.color;
 
-        if (style.shadow) {
+        if (style.shadow?.enabled) {
             ctx.shadowColor = style.shadow.shadowColor;
             ctx.shadowOffsetX = (style.shadow.shadowOffsetX || 0) * blockScale;
             ctx.shadowOffsetY = (style.shadow.shadowOffsetY || 0) * blockScale;
@@ -621,6 +624,13 @@ document.getElementById('textColor').addEventListener('input', () => {
 document.getElementById('shadowToggle').addEventListener('change', () => {
     const img = images[imageChoiceSelect.value];
     img.textBlock.defaultStyle.shadow.enabled = shadowToggle.checked;
+
+    // Also update line-specific shadows
+    img.textBlock.lines.forEach(line => {
+        if (line.style && line.style.shadow) {
+            line.style.shadow.enabled = shadowToggle.checked;
+        }
+    });
 
     updateAll();
 });
