@@ -192,9 +192,13 @@ function drawPerspectiveTextBlock(ctx, textBlock, userText, corners) {
     // Add padding to prevent clipping
     const padding = 20;
 
-    // Set temp canvas size with padding
-    tempCanvas.width = maxWidth + padding * 2;
-    tempCanvas.height = totalHeight + padding * 2;
+    // Set temp canvas size with padding - use higher resolution for smoother perspective transform
+    const PERSPECTIVE_SCALE = 4; // Adjust this (2, 3, 4) for quality vs performance
+    tempCanvas.width = (maxWidth + padding * 2) * PERSPECTIVE_SCALE;
+    tempCanvas.height = (totalHeight + padding * 2) * PERSPECTIVE_SCALE;
+
+    // Scale the temp context so all drawing happens at higher resolution
+    tempCtx.scale(PERSPECTIVE_SCALE, PERSPECTIVE_SCALE);
 
     // Draw text to temp canvas - using alphabetic baseline for iOS consistency
     tempCtx.textAlign = defaultStyle.align;
@@ -211,9 +215,9 @@ function drawPerspectiveTextBlock(ctx, textBlock, userText, corners) {
 
         if (shadowEnabled && line.style.shadow) {
             tempCtx.shadowColor = line.style.shadow.shadowColor;
-            tempCtx.shadowOffsetX = line.style.shadow.shadowOffsetX || 0;
-            tempCtx.shadowOffsetY = line.style.shadow.shadowOffsetY || 0;
-            tempCtx.shadowBlur = line.style.shadow.shadowBlur || 0;
+            tempCtx.shadowOffsetX = (line.style.shadow.shadowOffsetX || 0) * PERSPECTIVE_SCALE;
+            tempCtx.shadowOffsetY = (line.style.shadow.shadowOffsetY || 0) * PERSPECTIVE_SCALE;
+            tempCtx.shadowBlur = (line.style.shadow.shadowBlur || 0) * PERSPECTIVE_SCALE;
         } else {
             //explicitly disable shadows if not enabled in style
             tempCtx.shadowColor = 'transparent';
