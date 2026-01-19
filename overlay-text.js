@@ -30,6 +30,7 @@ const perspectiveToggle = document.getElementById('perspectiveToggle'),
     cornerBLY = document.getElementById('cornerBLY');
 
 // NEW: Perspective state
+const distortionMode = document.getElementById('distortionMode');
 let editMode = false;
 let draggingCorner = null;
 const handleRadius = 8;
@@ -519,6 +520,9 @@ function loadFromConfig(useSample = false) {
     textX.value = t.position.x;
     textY.value = t.position.y;
     scale.value = t.scale || 1;
+
+    //work out distortios
+    distortionMode.value = img.textBlock.transform.distortionMode || 'Simple';
     rotate.value = t.rotate || 0;
     skewX.value = t.skew?.x || 0;
     skewY.value = t.skew?.y || 0;
@@ -583,6 +587,7 @@ function loadFromConfig(useSample = false) {
 
     overlayToggle.dispatchEvent(new Event('change'));
     perspectiveToggle.dispatchEvent(new Event('change'));
+    distortionMode.dispatchEvent(new Event('change'));
 }
 // Text color handler
 document.getElementById('textColor').addEventListener('input', () => {
@@ -669,6 +674,11 @@ function updateUX() {
     for (let element of uploadOnlyElements) {
         element.classList.toggle('visually-hidden', images[imageChoiceSelect.value].meta.sourceType !== 'upload');
     }
+
+    //set the perspective mode display
+    const perspectiveControls = document.querySelectorAll('.perspective-control input, .perspective-control button');
+    perspectiveControls.forEach(el => el.disabled = !perspectiveToggle.checked);
+
 
     // NEW: Show/hide reset button based on whether config has been modified
     const resetBtn = document.getElementById('resetTemplateBtn');
@@ -786,16 +796,24 @@ perspectiveToggle.addEventListener('change', () => {
     const perspectiveControls = document.querySelectorAll('.perspective-control input, .perspective-control button');
     perspectiveControls.forEach(el => el.disabled = !perspectiveToggle.checked);
 
-    const displayWhenPerspective = document.querySelectorAll('.display-when-perspective');
-    displayWhenPerspective.forEach(el => el.classList.toggle('visually-hidden', !perspectiveToggle.checked));
-
-    const disableWhenPerspective = document.querySelectorAll('.disable-when-perspective input, .disable-when-perspective button');
-    disableWhenPerspective.forEach(el => el.disabled = perspectiveToggle.checked);
-
     console.log('Perspective toggled:', img.textBlock.perspective.enabled);
     updateAll();
 });
 
+distortionMode.addEventListener('change', () => {
+    const img = images[imageChoiceSelect.value];
+    img.textBlock.perspective.mode = distortionMode.value;
+
+    console.log('Distortion mode has been set');
+
+    const showWhenPerspective = document.querySelectorAll('.show-when-perspective');
+    showWhenPerspective.forEach(el => el.classList.toggle('d-none', distortionMode.value === 'Simple'));
+
+    const hideWhenPerspective = document.querySelectorAll('.hide-when-perspective');
+    hideWhenPerspective.forEach(el => el.classList.toggle('d-none', distortionMode.value === 'Perspective'));
+
+    updateAll();
+})
 perspectiveEditMode.addEventListener('change', () => {
     editMode = perspectiveEditMode.checked;
     console.log('Edit mode:', editMode);
