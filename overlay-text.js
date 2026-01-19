@@ -762,6 +762,12 @@ perspectiveToggle.addEventListener('change', () => {
     const perspectiveControls = document.querySelectorAll('.perspective-control input, .perspective-control button');
     perspectiveControls.forEach(el => el.disabled = !perspectiveToggle.checked);
 
+    const displayWhenPerspective = document.querySelectorAll('.display-when-perspective');
+    displayWhenPerspective.forEach(el => el.classList.toggle('visually-hidden', !perspectiveToggle.checked));
+
+    const disableWhenPerspective = document.querySelectorAll('.disable-when-perspective input, .disable-when-perspective button');
+    disableWhenPerspective.forEach(el => el.disabled = perspectiveToggle.checked);
+
     console.log('Perspective toggled:', img.textBlock.perspective.enabled);
     updateAll();
 });
