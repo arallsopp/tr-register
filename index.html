@@ -76,14 +76,14 @@
                 </div>
                 <div class="accordion" id="accordionControls">
                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingImageText">
+                        <h2 class="accordion-header" id="imageTextHeading">
                             <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#collapseImageText" aria-expanded="true"
-                                    aria-controls="collapseImageText">Image Text
+                                    data-bs-target="#imageTextPanel" aria-expanded="true"
+                                    aria-controls="imageTextPanel">Image Text
                             </button>
                         </h2>
-                        <div id="collapseImageText" class="accordion-collapse show"
-                             aria-labelledby="headingImageText" data-bs-parent="#accordionControls">
+                        <div id="imageTextPanel" class="accordion-collapse show"
+                             aria-labelledby="imageTextHeading" data-bs-parent="#accordionControls">
                             <div class="accordion-body">
                                 <div class="mb-2">
                                     <label for="userText" class="form-label d-block">Text to Add: <span
@@ -114,21 +114,21 @@
                     </div>
                     <!-- hidden image upload options -->
                     <div class="accordion-item upload-only visually-hidden"><!-- hidden by default, revealed  when selected  -->
-                        <h2 class="accordion-header" id="headingUploadedImage">
+                        <h2 class="accordion-header" id="uploadedImageHeading">
                             <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#collapseUploadedImage" aria-expanded="true"
-                                    aria-controls="collapseUploadedImage">External Image Options
+                                    data-bs-target="#uploadedImagePanel" aria-expanded="true"
+                                    aria-controls="uploadedImagePanel">External Image Options
                             </button>
                         </h2>
-                        <div id="collapseUploadedImage" class="accordion-collapse show"
-                             aria-labelledby="headingUploadedImage" data-bs-parent="#accordionControls">
+                        <div id="uploadedImagePanel" class="accordion-collapse show"
+                             aria-labelledby="uploadedImageHeading" data-bs-parent="#accordionControls">
                             <div class="accordion-body">
 
                                 <div class="form-check mb-2">
                                     <input class="form-check-input" type="checkbox" value="" id="overlayToggle"> <label
                                         class="form-check-label" for="overlayToggle"> Overlay Sign Post </label>
                                 </div>
-                                <div class="row mb-2">
+                                <div class="row mb-2k">
                                     <div class="col">
                                         <label for="cropX" class="form-label">Image Crop X</label>
                                         <input class="form-range" type="range" id="cropX" min="0" max="1"
@@ -162,13 +162,13 @@
                         </div>
                     </div>
                     <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingOne">
+                        <h2 class="accordion-header" id="textDistortionHeader">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                                    data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
-                                Advanced Text Options
+                                    data-bs-target="#textDistortionPanel" aria-expanded="false" aria-controls="textDistortionPanel">
+                                Text Distortion
                             </button>
                         </h2>
-                        <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne"
+                        <div id="textDistortionPanel" class="accordion-collapse collapse" aria-labelledby="textDistortionHeader"
                              data-bs-parent="#accordionControls">
                             <div class="accordion-body">
 
@@ -195,9 +195,17 @@
 
                             </div>
                         </div>
-                        <!-- Add this to your controls section -->
-                        <div class="perspective-controls">
-                            <h3>Perspective Distortion</h3>
+                    </div>
+
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="perspectiveHeader">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#perspectivePanel" aria-expanded="false" aria-controls="perspectivePanel">
+                                Perspective Distortion
+                            </button>
+                        </h2>
+                        <div id="perspectivePanel" class="accordion-collapse collapse" aria-labelledby="perspectiveHeader"
+                             data-bs-parent="#accordionControls">
 
                             <div class="control-group">
                                 <label>
@@ -245,20 +253,19 @@
                                 </div>
                             </div>
 
+                            <h4>Fixed Dimensions</h4>
 
-                                <h4>Fixed Dimensions</h4>
+                            <div class="control-group">
+                                <label for="perspectiveMaxWidth">Max Width (px):</label>
+                                <input type="number" id="perspectiveMaxWidth" class="form-control" placeholder="Auto" min="0" step="10">
+                                <small class="form-text text-muted">Lock width to prevent text size changes</small>
+                            </div>
 
-                                <div class="control-group">
-                                    <label for="perspectiveMaxWidth">Max Width (px):</label>
-                                    <input type="number" id="perspectiveMaxWidth" class="form-control" placeholder="Auto" min="0" step="10">
-                                    <small class="form-text text-muted">Lock width to prevent text size changes</small>
-                                </div>
-
-                                <div class="control-group">
-                                    <label for="perspectiveMaxLines">Max Lines:</label>
-                                    <input type="number" id="perspectiveMaxLines" class="form-control" placeholder="Auto" min="1" max="10" step="1">
-                                    <small class="form-text text-muted">Lock height for consistent line count</small>
-                                </div>
+                            <div class="control-group">
+                                <label for="perspectiveMaxLines">Max Lines:</label>
+                                <input type="number" id="perspectiveMaxLines" class="form-control" placeholder="Auto" min="1" max="10" step="1">
+                                <small class="form-text text-muted">Lock height for consistent line count</small>
+                            </div>
 
                         </div>
                     </div>

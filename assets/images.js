@@ -1,343 +1,618 @@
-// Image options (refactored)
+// Image options
 const images = {
-    image1: {
-        meta: {
-            name: 'Pub Lunch Landscape',
-            prompt: '2 lines',
-            src: 'assets/artwork/pub-lunch-landscape-master.jpg'
+    "image1": {
+        "meta": {
+            "name": "Pub Lunch Landscape",
+            "prompt": "2 lines",
+            "src": "assets/artwork/pub-lunch-landscape-master.jpg"
         },
-        textBlock: {
-            transform: {
-                position: { x: 82, y: 850 },
-                rotate: 0,
-                scale: 1,
-                skew: { x: 0, y: 0 }
-            },
-            defaultStyle: {
-                font: 'chalkboard',
-                size: 75,
-                color: 'rgba(255,255,255,0.8)',
-                align: 'left',
-                lineHeight: 101,
-                shadow: null
-            },
-            lines: [
-                { text: '22/02 - BOTANY BAY INNE    12:30' },
-                { text: 'ORGANISED BY SANDRA AND STEVE                  DT11 9ET',
-                    transform: { scale: 0.6 }
-                }
-            ]
-        }
-    },
-
-    image2: {
-        meta: {
-            name: 'Pub Lunch Portrait',
-            prompt: 'up to 5 lines',
-            src: 'assets/artwork/pub-lunch-portrait-master.jpg'
-        },
-        textBlock: {
-            transform: {
-                position: { x: 85, y: 1100 },
-                rotate: 0,
-                scale: 1,
-                skew: { x: 0, y: 0 }
-            },
-            defaultStyle: {
-                font: 'chalkboard',
-                size: 50,
-                color: 'rgba(255,255,255,0.8)',
-                align: 'left',
-                lineHeight: 60,
-                shadow: null
-            },
-            lines: [
-                { text: 'STEVE and SANDRA\'S' },
-                { text: 'FEBRUARY PUB LUNCH\n' +
-                        '\n' +
-                        '12:30 ON THE 22ND \n' +
-                        'The "BOTANY BAY INNE", DT11 9ET',
-                    transform: { scale: 0.8 }}
-            ]
-        }
-    },
-
-    image3: {
-        meta: {
-            name: 'Road Run',
-            prompt: '2 lines',
-            src: 'assets/artwork/road-run.jpg'
-        },
-        textBlock: {
-            transform: {
-                position: { x: 609, y: 293 },
-                rotate: 0,
-                scale: 1,
-                skew: { x: 0.01, y: 0.075 }
-            },
-            defaultStyle: {
-                font: 'Harmattan',
-                size: 60,
-                color: 'rgb(243,222,194)',
-                align: 'left',
-                lineHeight: 52,
-                shadow: {
-                    shadowColor: 'rgba(0,0,0,0.8)',
-                    shadowBlur: 1,
-                    shadowOffsetX: 1,
-                    shadowOffsetY: 1}
-            },
-            perspective: {
-                enabled: true,
-                increment: -0.005
-            },
-            lines: [
-                { text: "BRIAN AND LINDA'S" },
-                { text: "DRIVE IT DAY,  APRIL     26"}
-            ]
-        }
-    },
-
-    image4: {
-        meta: {
-            name: 'Monthly Meeting',
-            prompt: '1 line',
-            src: 'assets/artwork/monthly-meeting.jpg'
-        },
-        textBlock: {
-            transform: {
-                position: { x: 770, y: 375 },
-                rotate: 0,
-                scale: 1,
-                skew: { x: 0, y: 0 }
-            },
-            defaultStyle: {
-                font: 'Harmattan',
-                size: 50,
-                color: 'rgb(246,240,211)',
-                align: 'center',
-                lineHeight: 43,
-                shadow: {
-                    shadowColor: 'rgba(0,0,0,1)',
-                    shadowBlur: 6,
-                    shadowOffsetX: 1,
-                    shadowOffsetY: 1
+        "textBlock": {
+            "transform": {
+                "position": {
+                    "x": 82,
+                    "y": 850
+                },
+                "rotate": 0,
+                "scale": 1,
+                "skew": {
+                    "x": 0,
+                    "y": 0
                 }
             },
-            lines: [
-                { text: 'FEBRUARY 12TH' }
-            ]
-        }
-    },
-
-    image5: {
-        meta: {
-            name: 'Generic Driving',
-            prompt: '2 lines',
-            src: 'assets/artwork/corfe-drive.jpg'
-        },
-        textBlock: {
-            transform: {
-                position: { x: 755, y: 790 },
-                rotate: 0,
-                scale: 1,
-                skew: { x: 0, y: 0 }
+            "defaultStyle": {
+                "font": "chalkboard",
+                "size": 75,
+                "color": "rgba(255,255,255,0.8)",
+                "align": "left",
+                "lineHeight": 101,
+                "shadow": null
             },
-            defaultStyle: {
-                font: 'Harmattan',
-                size: 55,
-                color: 'rgb(246,226,205)',
-                align: 'left',
-                lineHeight: 49,
-                shadow: {
-                    shadowColor: 'rgba(0,0,0,1)',
-                    shadowBlur: 2,
-                    shadowOffsetX: 1,
-                    shadowOffsetY: 1
-                }
-            },
-            lines: [
-                { text: 'LULWORTH MAY          17' },
-                { text: 'BRESSUIRE JUNE         21' }
-            ]
-        }
-    },
-
-    image6: {
-        meta: {
-            name: 'Racing',
-            prompt: '2 lines',
-            src: 'assets/artwork/racing-tr3.jpg'
-        },
-        textBlock: {
-            transform: {
-                position: { x: 1310, y: 62 },
-                rotate: 0,
-                scale: 1,
-                skew: { x: 0, y: 0 }
-            },
-            defaultStyle: {
-                font: 'Racing Sans One',
-                size: 75,
-                color: 'rgb(38,62,47)',
-                align: 'right',
-                lineHeight: 65,
-                shadow: null
-            },
-            lines: [
-                { text: 'Thruxton Retro' },
+            "lines": [
                 {
-                    text: '3rd - 5th July 2026',
-                    transform: { scale: 0.7 }
-                }
-            ]
-        }
-    },
-    image7: {
-        meta: {
-            name: 'Dorset Postcard',
-            prompt: '2 lines',
-            src: 'assets/artwork/dorset-cliffs-pub-track.jpg'
-        },
-        textBlock: {
-            transform: {
-                position: { x: 716, y: 75 },
-                rotate: 0,
-                scale: 1,
-                skew: { x: 0, y: 0 }
-            },
-            defaultStyle: {
-                font: 'Damion',
-                size: 125,
-                color: 'rgb(28,41,25)',
-                align: 'center',
-                lineHeight: 107,
-                shadow: null
-            },
-            lines: [
-                { text: 'Thruxton Retro' },
+                    "text": "22/02 - BOTANY BAY INNE    12:30"
+                },
                 {
-                    text: '3rd - 5th July 2026',
-                    transform: { scale: 0.7 }
+                    "text": "ORGANISED BY SANDRA AND STEVE                  DT11 9ET",
+                    "transform": {
+                        "scale": 0.6
+                    }
+                }
+            ],
+            "perspective": {
+                "enabled": false,
+                "corners": [
+                    {
+                        "x": -29.30841049083795,
+                        "y": -67.39533667465673
+                    },
+                    {
+                        "x": 1156.9812884980438,
+                        "y": -67.39533667465673
+                    },
+                    {
+                        "x": 1141.7480339363888,
+                        "y": 168.71896564247845
+                    },
+                    {
+                        "x": -27.40425367063107,
+                        "y": 166.81481804314672
+                    }
+                ]
+            }
+        }
+    },
+    "image2": {
+        "meta": {
+            "name": "Pub Lunch Portrait",
+            "prompt": "up to 5 lines",
+            "src": "assets/artwork/pub-lunch-portrait-master.jpg"
+        },
+        "textBlock": {
+            "transform": {
+                "position": {
+                    "x": 85,
+                    "y": 1100
+                },
+                "rotate": 0,
+                "scale": 1,
+                "skew": {
+                    "x": 0,
+                    "y": 0
+                }
+            },
+            "defaultStyle": {
+                "font": "chalkboard",
+                "size": 50,
+                "color": "rgba(255,255,255,0.8)",
+                "align": "left",
+                "lineHeight": 60,
+                "shadow": null
+            },
+            "lines": [
+                {
+                    "text": "STEVE and SANDRA'S"
+                },
+                {
+                    "text": "FEBRUARY PUB LUNCH\n\n12:30 ON THE 22ND \nThe \"BOTANY BAY INNE\", DT11 9ET",
+                    "transform": {
+                        "scale": 0.8
+                    }
+                }
+            ],
+            "perspective": {
+                "enabled": false,
+                "corners": [
+                    {
+                        "x": -17.157286597199416,
+                        "y": -60.99872611464957
+                    },
+                    {
+                        "x": 648.123219777267,
+                        "y": -53.171974522292885
+                    },
+                    {
+                        "x": 646.1665124055774,
+                        "y": 269.6815286624203
+                    },
+                    {
+                        "x": -23.027408712268233,
+                        "y": 277.508280254777
+                    }
+                ]
+            }
+        }
+    },
+    "image3": {
+        "meta": {
+            "name": "Road Run",
+            "prompt": "2 lines",
+            "src": "assets/artwork/road-run.jpg"
+        },
+        "textBlock": {
+            "transform": {
+                "position": {
+                    "x": 601,
+                    "y": 293
+                },
+                "rotate": 10.5,
+                "scale": 1,
+                "skew": {
+                    "x": 0.18,
+                    "y": -0.11
+                }
+            },
+            "defaultStyle": {
+                "font": "Harmattan",
+                "size": 60,
+                "color": "rgb(243,222,194)",
+                "align": "left",
+                "lineHeight": 52,
+                "shadow": {
+                    "shadowColor": "rgba(0,0,0,0.8)",
+                    "shadowBlur": 1,
+                    "shadowOffsetX": 1,
+                    "shadowOffsetY": 1
+                }
+            },
+            "perspective": {
+                "enabled": true,
+                "corners": [
+                    {
+                        "x": -11.336187192499892,
+                        "y": -32.131778891552244
+                    },
+                    {
+                        "x": 616.6521907565955,
+                        "y": 24.992649088399787
+                    },
+                    {
+                        "x": 616.6521907565955,
+                        "y": 141.14565264763564
+                    },
+                    {
+                        "x": -13.623716731879199,
+                        "y": 97.35025786300577
+                    }
+                ],
+                "maxLines": 2,
+                "maxWidth": 690
+            },
+            "lines": [
+                {
+                    "text": "BRIAN AND LINDA'S"
+                },
+                {
+                    "text": "DRIVE IT DAY,  APRIL     26"
                 }
             ]
         }
     },
-    image8: {
-        meta: {
-            name: 'Evening Road Run',
-            prompt: '2 lines',
-            src: 'assets/artwork/evening-road-run.jpg'
+    "image4": {
+        "meta": {
+            "name": "Monthly Meeting",
+            "prompt": "1 line",
+            "src": "assets/artwork/monthly-meeting.jpg"
         },
-        textBlock: {
-            transform: {
-                position: { x: 907, y: 260 },
-                rotate: 0,
-                scale: 1,
-                skew: { x: -0.01, y: -0.09 }
+        "textBlock": {
+            "transform": {
+                "position": {
+                    "x": 770,
+                    "y": 375
+                },
+                "rotate": 0,
+                "scale": 1,
+                "skew": {
+                    "x": 0,
+                    "y": 0
+                }
             },
-            perspective: {
-                enabled: true,  // or true to enable by default
-                maxWidth: 400,
-                maxLines: 2,
-                corners: [
-                    {x: -11, y: -32},      // top-left
-                    {x: 427, y: -79},    // top-right
-                    {x: 425, y: 56},  // bottom-right
-                    {x: -16, y: 92}     // bottom-left
+            "defaultStyle": {
+                "font": "Harmattan",
+                "size": 50,
+                "color": "rgb(246,240,211)",
+                "align": "center",
+                "lineHeight": 43,
+                "shadow": {
+                    "shadowColor": "rgba(0,0,0,1)",
+                    "shadowBlur": 6,
+                    "shadowOffsetX": 1,
+                    "shadowOffsetY": 1
+                }
+            },
+            "lines": [
+                {
+                    "text": "FEBRUARY 12TH"
+                }
+            ],
+            "perspective": {
+                "enabled": false,
+                "corners": [
+                    {
+                        "x": -226.03595087746487,
+                        "y": -26.540989322292432
+                    },
+                    {
+                        "x": 246.1949405338396,
+                        "y": -30.349284520955905
+                    },
+                    {
+                        "x": 248.09909735404642,
+                        "y": 80.09127624028474
+                    },
+                    {
+                        "x": -226.03595087746487,
+                        "y": 78.187128640953
+                    }
+                ]
+            }
+        }
+    },
+    "image5": {
+        "meta": {
+            "name": "Generic Driving",
+            "prompt": "2 lines",
+            "src": "assets/artwork/corfe-drive.jpg"
+        },
+        "textBlock": {
+            "transform": {
+                "position": {
+                    "x": 755,
+                    "y": 790
+                },
+                "rotate": 0,
+                "scale": 1,
+                "skew": {
+                    "x": 0,
+                    "y": 0
+                }
+            },
+            "defaultStyle": {
+                "font": "Harmattan",
+                "size": 55,
+                "color": "rgb(246,226,205)",
+                "align": "left",
+                "lineHeight": 49,
+                "shadow": {
+                    "shadowColor": "rgba(0,0,0,1)",
+                    "shadowBlur": 2,
+                    "shadowOffsetX": 1,
+                    "shadowOffsetY": 1
+                }
+            },
+            "lines": [
+                {
+                    "text": "LULWORTH MAY          17"
+                },
+                {
+                    "text": "BRESSUIRE JUNE         21"
+                }
+            ],
+            "perspective": {
+                "enabled": false,
+                "corners": [
+                    {
+                        "x": -26.332739317398136,
+                        "y": -35.95755066463278
+                    },
+                    {
+                        "x": 546.8184635648704,
+                        "y": -34.05340306530104
+                    },
+                    {
+                        "x": 546.8184635648704,
+                        "y": 99.23692888792039
+                    },
+                    {
+                        "x": -26.332739317398136,
+                        "y": 104.9493716859156
+                    }
+                ],
+                "maxWidth": 550
+            }
+        }
+    },
+    "image6": {
+        "meta": {
+            "name": "Racing",
+            "prompt": "2 lines",
+            "src": "assets/artwork/racing-tr3.jpg"
+        },
+        "textBlock": {
+            "transform": {
+                "position": {
+                    "x": 1310,
+                    "y": 62
+                },
+                "rotate": 0,
+                "scale": 1,
+                "skew": {
+                    "x": 0,
+                    "y": 0
+                }
+            },
+            "defaultStyle": {
+                "font": "Racing Sans One",
+                "size": 75,
+                "color": "rgb(38,62,47)",
+                "align": "right",
+                "lineHeight": 65,
+                "shadow": null
+            },
+            "lines": [
+                {
+                    "text": "Thruxton Retro"
+                },
+                {
+                    "text": "3rd - 5th July 2026",
+                    "transform": {
+                        "scale": 0.7
+                    }
+                }
+            ],
+            "perspective": {
+                "enabled": false,
+                "corners": [
+                    {
+                        "x": -502.96471704874534,
+                        "y": -48.512164465641625
+                    },
+                    {
+                        "x": 38.237595761784405,
+                        "y": -50.198143907436425
+                    },
+                    {
+                        "x": 31.493641708070527,
+                        "y": 126.82969748101723
+                    },
+                    {
+                        "x": -511.39465961588746,
+                        "y": 236.41836119767902
+                    }
+                ],
+                "maxLines": 2
+            }
+        }
+    },
+    "image7": {
+        "meta": {
+            "name": "Dorset Postcard",
+            "prompt": "2 lines",
+            "src": "assets/artwork/dorset-cliffs-pub-track.jpg"
+        },
+        "textBlock": {
+            "transform": {
+                "position": {
+                    "x": 716,
+                    "y": 75
+                },
+                "rotate": 0,
+                "scale": 1,
+                "skew": {
+                    "x": 0,
+                    "y": 0
+                }
+            },
+            "defaultStyle": {
+                "font": "Damion",
+                "size": 125,
+                "color": "rgb(28,41,25)",
+                "align": "center",
+                "lineHeight": 107,
+                "shadow": null
+            },
+            "lines": [
+                {
+                    "text": "Thruxton Retro"
+                },
+                {
+                    "text": "3rd - 5th July 2026",
+                    "transform": {
+                        "scale": 0.7
+                    }
+                }
+            ],
+            "perspective": {
+                "enabled": true,
+                "corners": [
+                    {
+                        "x": -384.291113005075,
+                        "y": -58.4762634524322
+                    },
+                    {
+                        "x": 359.27840622941926,
+                        "y": -62.148204907447266
+                    },
+                    {
+                        "x": 353.7704838647194,
+                        "y": 163.67619457597934
+                    },
+                    {
+                        "x": -387.96306124820825,
+                        "y": 154.49634093844168
+                    }
+                ]
+            }
+        }
+    },
+    "image8": {
+        "meta": {
+            "name": "Evening Road Run",
+            "prompt": "2 lines",
+            "src": "assets/artwork/evening-road-run.jpg"
+        },
+        "textBlock": {
+            "transform": {
+                "position": {
+                    "x": 907,
+                    "y": 260
+                },
+                "rotate": 0,
+                "scale": 1,
+                "skew": {
+                    "x": -0.01,
+                    "y": -0.09
+                }
+            },
+            "perspective": {
+                "enabled": true,
+                "maxWidth": 400,
+                "maxLines": 2,
+                "corners": [
+                    {
+                        "x": -11,
+                        "y": -32
+                    },
+                    {
+                        "x": 427,
+                        "y": -79
+                    },
+                    {
+                        "x": 425,
+                        "y": 56
+                    },
+                    {
+                        "x": -16,
+                        "y": 92
+                    }
                 ]
             },
-            defaultStyle: {
-                font: 'Harmattan',
-                size: 37,
-                color: 'rgb(158,133,110)',
-                align: 'left',
-                lineHeight: 39,
-                shadow: {
-                    shadowColor: 'rgba(0,0,0,1)',
-                    shadowBlur: 2,
-                    shadowOffsetX: 2,
-                    shadowOffsetY: 2
+            "defaultStyle": {
+                "font": "Harmattan",
+                "size": 37,
+                "color": "rgb(158,133,110)",
+                "align": "left",
+                "lineHeight": 39,
+                "shadow": {
+                    "shadowColor": "rgba(0,0,0,1)",
+                    "shadowBlur": 2,
+                    "shadowOffsetX": 2,
+                    "shadowOffsetY": 2
                 }
             },
-            lines: [
-                { text: 'EVENING ROAD RUN        9/5' },
-                { text: 'TIM + SAM                      5:45'}
+            "lines": [
+                {
+                    "text": "EVENING ROAD RUN        9/5"
+                },
+                {
+                    "text": "TIM + SAM                      5:45"
+                }
             ]
         }
     },
-    image9: {
-        meta: {
-            name: 'Dorset Day Run',
-            prompt: '2 lines',
-            src: 'assets/artwork/day-dorset.jpg'
+    "image9": {
+        "meta": {
+            "name": "Dorset Day Run",
+            "prompt": "2 lines",
+            "src": "assets/artwork/day-dorset.jpg"
         },
-        textBlock: {
-            transform: {
-                position: { x: 818, y: 274 },
-                rotate: 0,
-                scale: 1,
-                skew: { x: -0.01, y: -0.065 }
-            },
-            perspective: {
-                enabled: true,
-                increment: 0.002,
-            },
-            defaultStyle: {
-                font: 'Harmattan',
-                size: 32,
-                color: 'rgb(236,221,195)',
-                align: 'left',
-                lineHeight: 32,
-                shadow: {
-                    shadowColor: 'rgba(0,0,0,1)',
-                    shadowBlur: 2,
-                    shadowOffsetX: 1,
-                    shadowOffsetY: 1
+        "textBlock": {
+            "transform": {
+                "position": {
+                    "x": 816,
+                    "y": 274
+                },
+                "rotate": 0,
+                "scale": 1,
+                "skew": {
+                    "x": -0.01,
+                    "y": -0.065
                 }
             },
-            lines: [
-                { text: 'DORSET DAY RUN     ?'},
-                { text: 'DESCRIPTION           ?' }
+            "perspective": {
+                "enabled": true,
+                "maxWidth": 340,
+                "maxLines": 2,
+                "corners": [
+                    {
+                        "x": -16.767062788738144,
+                        "y": -24.871743659498264
+                    },
+                    {
+                        "x": 345.026237034024,
+                        "y": -43.91339382565127
+                    },
+                    {
+                        "x": 351.37348790810734,
+                        "y": 41.77403192203724
+                    },
+                    {
+                        "x": -23.1143136628217,
+                        "y": 75.096919712805
+                    }
+                ]
+            },
+            "defaultStyle": {
+                "font": "Harmattan",
+                "size": 32,
+                "color": "rgb(236,221,195)",
+                "align": "left",
+                "lineHeight": 32,
+                "shadow": {
+                    "shadowColor": "rgba(0,0,0,1)",
+                    "shadowBlur": 2,
+                    "shadowOffsetX": 1,
+                    "shadowOffsetY": 1
+                }
+            },
+            "lines": [
+                {
+                    "text": "DORSET DAY RUN     ?"
+                },
+                {
+                    "text": "DESCRIPTION           ?"
+                }
             ]
         }
     },
-    upload: {
-        meta: {
-            name: 'Uploaded Image',
-            sourceType: 'upload'
+    "upload": {
+        "meta": {
+            "name": "Uploaded Image",
+            "sourceType": "upload"
         },
-        overlay: {
-            enabled: true,
-            src: 'assets/overlays/redpost.png',
-            scale: 0.4,
-            offset: {x:30, y:0}, // pixels from bottom right
-            textOffset: { x: 80, y: 357 } // position of text relative to overlay's top-left
-        },
-        textBlock: {
-            transform: {
-                position: { x: 28, y: 58 },
-                rotate: 0,
-                scale: 1,
-                skew: { x: 0, y: 0 }
+        "overlay": {
+            "enabled": true,
+            "src": "assets/overlays/redpost.png",
+            "scale": 0.4,
+            "offset": {
+                "x": 30,
+                "y": 0
             },
-            defaultStyle: {
-                font: 'Harmattan',
-                size: 82,
-                color: '#faf0d7',
-                align: 'left',
-                lineHeight: 67,
-                shadow: {
-                    shadowColor: 'rgba(0,0,0,1)',
-                    shadowBlur: 3,
-                    shadowOffsetX: 2,
-                    shadowOffsetY: 2
+            "textOffset": {
+                "x": 80,
+                "y": 357
+            }
+        },
+        "textBlock": {
+            "transform": {
+                "position": {
+                    "x": 28,
+                    "y": 58
+                },
+                "rotate": 0,
+                "scale": 1,
+                "skew": {
+                    "x": 0,
+                    "y": 0
                 }
             },
-            lines: [
-                { text: 'SIGN PRIMARY LINE   1\n' +
-                        'SIGN NEXT LINE          2' }
+            "defaultStyle": {
+                "font": "Harmattan",
+                "size": 82,
+                "color": "#faf0d7",
+                "align": "left",
+                "lineHeight": 67,
+                "shadow": {
+                    "shadowColor": "rgba(0,0,0,1)",
+                    "shadowBlur": 3,
+                    "shadowOffsetX": 2,
+                    "shadowOffsetY": 2
+                }
+            },
+            "lines": [
+                {
+                    "text": "SIGN PRIMARY LINE   1\nSIGN NEXT LINE          2"
+                }
             ]
         }
     }
-};
+}
