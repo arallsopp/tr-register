@@ -54,6 +54,7 @@ Promise.all([
     console.log('All fonts loaded');
     //fonts are ready, we can render.
     updateFormValuesFromURLParams();
+
 }).catch(err => {
     console.error('Error loading fonts:', err);
     // Still try to render even if fonts fail
@@ -411,6 +412,8 @@ function updateFormValuesFromURLParams(){
         textarea.value = decodeURIComponent(text);
         textarea.dispatchEvent(new Event('input'));
     }
+
+    updateAll();
 }
 // Helper function to convert rgba to hex and alpha (used by defaultStyle.color)
 function rgbaToHexAndAlpha(rgba) {
