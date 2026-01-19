@@ -605,6 +605,75 @@ const images ={
             ]
         }
     },
+    "image10": {
+        "meta": {
+            "name": "Sign Photograph",
+            "prompt": "2 lines",
+            "src": "assets/artwork/red-sign-photo.jpg"
+        },
+        "textOffset": {
+            "x": 80,
+                "y": 357
+        },
+        "textBlock": {
+        "transform": {
+            "position": {
+                "x": 28,
+                    "y": 58
+            },
+            "distortionMode": "Perspective",
+                "rotate": 0,
+                "scale": 1,
+                "skew": {
+                "x": 0,
+                    "y": 0
+            }
+        },
+        "defaultStyle": {
+            "font": "Harmattan",
+                "size": 82,
+                "color": "rgba(248,247,246,1)",
+                "align": "left",
+                "lineHeight": 67,
+                "shadow": {
+                "enabled": true,
+                    "shadowColor": "rgba(0,0,0,1)",
+                    "shadowBlur": 3,
+                    "shadowOffsetX": 1,
+                    "shadowOffsetY": 1
+            }
+        },
+        "lines": [
+            {
+                "text": "ABCDEFGHIJKLM\nOPQRSTUVWXYZ"
+            }
+        ],
+            "perspective": {
+            "enabled": true,
+                "corners": [
+                {
+                    "x": 672.5355789838287,
+                    "y": 409.2966350656181
+                },
+                {
+                    "x": 1157.4205904213482,
+                    "y": 392.966376313325
+                },
+                {
+                    "x": 1161.189126779671,
+                    "y": 556.268963836256
+                },
+                {
+                    "x": 672.5355789838287,
+                    "y": 549.9880950853741
+                }
+            ],
+            "mode": "Perspective",
+            "maxWidth": 578,
+            "maxLines": 2
+            }
+        }
+    },
     "upload": {
         "meta": {
             "name": "Uploaded Image",
