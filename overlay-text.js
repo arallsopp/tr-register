@@ -408,6 +408,27 @@ function updateFormValuesFromURLParams(){
         textarea.dispatchEvent(new Event('input'));
     }
 }
+// Helper function to convert rgba to hex and alpha (used by defaultStyle.color)
+function rgbaToHexAndAlpha(rgba) {
+    const match = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+    if (!match) return { hex: '#ffffff', alpha: 1 };
+
+    const r = parseInt(match[1]);
+    const g = parseInt(match[2]);
+    const b = parseInt(match[3]);
+    const a = match[4] ? parseFloat(match[4]) : 1;
+
+    const hex = '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+    return { hex, alpha: a };
+}
+
+// Helper function to convert hex and alpha to rgba (used by defaultStyle.color)
+function hexAndAlphaToRgba(hex, alpha) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+}
 
 function renderImage(imageConfig, userText) {
     const baseImage = getBaseImage(imageConfig);
@@ -528,7 +549,7 @@ function loadFromConfig(useSample = false) {
     textY.value = t.position.y;
     scale.value = t.scale || 1;
 
-    //work out distortios
+    //work out distortion
     distortionMode.value = img.textBlock.transform.distortionMode || 'Simple';
     rotate.value = t.rotate || 0;
     skewX.value = t.skew?.x || 0;
@@ -592,6 +613,17 @@ function loadFromConfig(useSample = false) {
         fontChoice.value = img.textBlock.defaultStyle.font || 'chalkboard';
     }
 
+    const colorChoice = document.getElementById('textColor');
+    const opacityChoice = document.getElementById('textOpacity');
+    const opacityValue = document.getElementById('opacityValue');
+
+    if (colorChoice) {
+        const { hex, alpha } = rgbaToHexAndAlpha(img.textBlock.defaultStyle.color);
+        colorChoice.value = hex;
+        opacityChoice.value = alpha;
+        opacityValue.textContent = Math.round(alpha * 100) + '%';
+    }
+
     // Load shadow settings
     shadowToggle.checked = img.textBlock.defaultStyle.shadow.enabled || false;
 
@@ -606,20 +638,40 @@ function loadFromConfig(useSample = false) {
 // Text color handler
 document.getElementById('textColor').addEventListener('input', () => {
     const img = images[imageChoiceSelect.value];
-    const color = document.getElementById('textColor').value;
+    const hex = document.getElementById('textColor').value;
+    const alpha = parseFloat(document.getElementById('textOpacity').value);
+    const rgba = hexAndAlphaToRgba(hex, alpha);
 
-    img.textBlock.defaultStyle.color = color;
+    img.textBlock.defaultStyle.color = rgba;
 
-    // Update all line-specific colors if they exist
     img.textBlock.lines.forEach(line => {
         if (line.style) {
-            line.style.color = color;
+            line.style.color = rgba;
         }
     });
 
     updateAll();
 });
 
+// Opacity handler
+document.getElementById('textOpacity').addEventListener('input', () => {
+    const img = images[imageChoiceSelect.value];
+    const hex = document.getElementById('textColor').value;
+    const alpha = parseFloat(document.getElementById('textOpacity').value);
+    const rgba = hexAndAlphaToRgba(hex, alpha);
+
+    document.getElementById('opacityValue').textContent = Math.round(alpha * 100) + '%';
+
+    img.textBlock.defaultStyle.color = rgba;
+
+    img.textBlock.lines.forEach(line => {
+        if (line.style) {
+            line.style.color = rgba;
+        }
+    });
+
+    updateAll();
+});
 // Shadow toggle handler
 document.getElementById('shadowToggle').addEventListener('change', () => {
     const img = images[imageChoiceSelect.value];

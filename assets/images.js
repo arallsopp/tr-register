@@ -26,7 +26,11 @@ const images ={
                 "align": "left",
                 "lineHeight": 101,
                 "shadow": {
-                    "enabled":false
+                    "enabled":false,
+                    "shadowColor": "rgba(0,0,0,1)",
+                    "shadowBlur": 2,
+                    "shadowOffsetX": 2,
+                    "shadowOffsetY": 2
                 }
             },
             "lines": [
@@ -91,7 +95,12 @@ const images ={
                 "align": "left",
                 "lineHeight": 60,
                 "shadow": {
-                   "enabled":false
+                   "enabled":false,
+                    "shadowColor": "rgba(0,0,0,1)",
+                    "shadowBlur": 2,
+                    "shadowOffsetX": 2,
+                    "shadowOffsetY": 2
+
                 }
             },
             "lines": [
@@ -287,7 +296,7 @@ const images ={
                 "align": "left",
                 "lineHeight": 49,
                 "shadow": {
-                    "enabled":false,
+                    "enabled":true,
                     "shadowColor": "rgba(0,0,0,1)",
                     "shadowBlur": 2,
                     "shadowOffsetX": 1,
@@ -353,7 +362,12 @@ const images ={
                 "align": "right",
                 "lineHeight": 65,
                 "shadow": {
-                    "enabled":false
+                    "enabled":true,
+                    "shadowColor": "rgb(244,217,180)",
+                    "shadowBlur": 2,
+                    "shadowOffsetX": 2,
+                    "shadowOffsetY": 2
+
                 }
             },
             "lines": [
@@ -418,7 +432,12 @@ const images ={
                 "align": "center",
                 "lineHeight": 107,
                 "shadow": {
-                    "enabled":false
+                    "enabled":false,
+                    "shadowColor": "rgb(221,210,154)",
+                    "shadowBlur": 2,
+                    "shadowOffsetX": 2,
+                    "shadowOffsetY": 2
+
                 }
             },
             "lines": [
@@ -477,7 +496,7 @@ const images ={
             },
             "perspective": {
                 "enabled": true,
-                "maxWidth": 400,
+                "maxWidth": 447,
                 "maxLines": 2,
                 "corners": [
                     {
@@ -544,24 +563,24 @@ const images ={
             },
             "perspective": {
                 "enabled": true,
-                "maxWidth": 340,
+                "maxWidth": 366,
                 "maxLines": 2,
                 "corners": [
                     {
-                        "x": -5.860492502302918,
-                        "y": -15.157687697320625
+                        "x": -7,
+                        "y": -19
                     },
                     {
-                        "x": 352.00805325786564,
-                        "y": -43.16464351437591
+                        "x": 360,
+                        "y": -44
                     },
                     {
-                        "x": 355.11995365578014,
-                        "y": 57.97158582499031
+                        "x": 355,
+                        "y": 58
                     },
                     {
-                        "x": -12.084293298132025,
-                        "y": 73.53100572335433
+                        "x": -10,
+                        "y": 81
                     }
                 ]
             },
