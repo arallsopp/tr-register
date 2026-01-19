@@ -206,73 +206,89 @@
                         </h2>
                         <div id="perspectivePanel" class="accordion-collapse collapse" aria-labelledby="perspectiveHeader"
                              data-bs-parent="#accordionControls">
-
-                            <div class="control-group">
-                                <label>
-                                    <input type="checkbox" id="perspectiveToggle">
-                                    Enable Perspective
-                                </label>
-                            </div>
-
-                            <div class="control-group perspective-control">
-                                <label>
-                                    <input type="checkbox" id="perspectiveEditMode">
-                                    Edit Mode (Show Handles)
-                                </label>
-                            </div>
-
-                            <div class="perspective-control">
-                                <h4>Corner Positions</h4>
-
-                                <div class="control-group">
-                                    <label>Top-Left X:</label>
-                                    <input type="number" id="cornerTLX" value="0">
-                                    <label>Y:</label>
-                                    <input type="number" id="cornerTLY" value="0">
+                            <div class="accordion-body">
+                                <div class="row mb-2">
+                                    <div class="col">
+                                        <input class="form-check-input" type="checkbox" value="" id="perspectiveToggle">
+                                        <label class="form-check-label" for="perspectiveToggle">
+                                            Enable
+                                        </label>
+                                    </div>
+                                    <div class="col">
+                                        <input class="form-check-input" type="checkbox" value="" id="perspectiveEditMode">
+                                        <label class="form-check-label" for="perspectiveEditMode">
+                                            Visual Edit
+                                        </label>
+                                    </div>
                                 </div>
 
-                                <div class="control-group">
-                                    <label>Top-Right X:</label>
-                                    <input type="number" id="cornerTRX" value="400">
-                                    <label>Y:</label>
-                                    <input type="number" id="cornerTRY" value="0">
-                                </div>
-
-                                <div class="control-group">
-                                    <label>Bottom-Right X:</label>
-                                    <input type="number" id="cornerBRX" value="400">
-                                    <label>Y:</label>
-                                    <input type="number" id="cornerBRY" value="200">
-                                </div>
-
-                                <div class="control-group">
-                                    <label>Bottom-Left X:</label>
-                                    <input type="number" id="cornerBLX" value="0">
-                                    <label>Y:</label>
-                                    <input type="number" id="cornerBLY" value="200">
+                                <div class="perspective-control">
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="cornerTLX" class="form-label">Top Left X</label>
+                                            <input type="number" id="cornerTLX" class="form-control"/>
+                                        </div>
+                                        <div class="col">
+                                            <label for="cornerTLY" class="form-label">Top Left Y</label>
+                                            <input type="number" id="cornerTLY" class="form-control"/>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="cornerTRX" class="form-label">Top Right X</label>
+                                            <input type="number" id="cornerTRX" class="form-control"/>
+                                        </div>
+                                        <div class="col">
+                                            <label for="cornerTRY" class="form-label">Top Right Y</label>
+                                            <input type="number" id="cornerTRY" class="form-control"/>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="cornerBLX" class="form-label">Bottom Left X</label>
+                                            <input type="number" id="cornerBLX" class="form-control"/>
+                                        </div>
+                                        <div class="col">
+                                            <label for="cornerBLY" class="form-label">Bottom Left Y</label>
+                                            <input type="number" id="cornerBLY" class="form-control"/>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="cornerBRX" class="form-label">Bottom Right X</label>
+                                            <input type="number" id="cornerBRX" class="form-control"/>
+                                        </div>
+                                        <div class="col">
+                                            <label for="cornerBRY" class="form-label">Bottom Right Y</label>
+                                            <input type="number" id="cornerBRY" class="form-control"/>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col">
+                                            <label for="perspectiveMaxWidth" class="form-label">Output Width (px)</label>
+                                            <input type="number" id="perspectiveMaxWidth" placeholder="Auto" class="form-control"/>
+                                        </div>
+                                        <div class="col">
+                                            <label for="perspectiveMaxLines" class="form-label">Line Count</label>
+                                            <input type="number" id="perspectiveMaxLines" placeholder="Auto" class="form-control"/>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-
-                            <h4>Fixed Dimensions</h4>
-
-                            <div class="control-group">
-                                <label for="perspectiveMaxWidth">Max Width (px):</label>
-                                <input type="number" id="perspectiveMaxWidth" class="form-control" placeholder="Auto" min="0" step="10">
-                                <small class="form-text text-muted">Lock width to prevent text size changes</small>
-                            </div>
-
-                            <div class="control-group">
-                                <label for="perspectiveMaxLines">Max Lines:</label>
-                                <input type="number" id="perspectiveMaxLines" class="form-control" placeholder="Auto" min="1" max="10" step="1">
-                                <small class="form-text text-muted">Lock height for consistent line count</small>
-                            </div>
-
                         </div>
                     </div>
                 </div>
             </div>
-            <button id="saveBtn" class="btn btn-primary w-100 ">Save Image</button>
-            <button id="resetTemplateBtn" class="btn btn-warning w-100 mb-2">Reset from Template</button>
+            <div class="row">
+                <div class="col">
+                    <button id="resetTemplateBtn" class="btn btn-outline-warning w-100 mb-2">Reset</button>
+                </div>
+                <div class="col">
+                    <button id="saveBtn" class="btn btn-primary w-100 ">Save Image</button>
+                </div>
+
+            </div>
+
         </div>
         <div class="col-12 col-sm-7 col-md-8 mb-3 sticky-column">
             <div class="text-center">
